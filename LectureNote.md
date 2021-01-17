@@ -1,0 +1,115 @@
+# 벨로퍼트와 함께하는 모던 리액트
+: 출처 https://react.vlpt.us/
+## 1장. 리액트 입문
+
+### 1-1. 리액트는 어쩌다 만들어 졌을까?
+DOM을 직접 건드리면서 이벤트 핸들러, 상태값을 직접 작업하는 것은 규모가 커지면서 난잡해진다.
+
+![난잡](https://i.imgur.com/mJftTBq.png)
+
+그래서, AngularJS와 같은 다양한 프레임워크들이 나왔다. 이런 프레임워크들은 JS의 특정 값이 바뀌면 DOM속성이 업데이트 되도록 해서 작업을 간소화 시켜주는 방식이다.
+
+리액트는 어떠한 상태가 바뀌었을때, 그 상태에 따라 DOM을 어떻게 업데이트 할 지 규칙을 정하는 것이 아니라, 처음부터 모든걸 새로 만들어서 보여주면 어떻까? 라는 아이디어에서 개발이 시작되었다.
+
+![react](https://i.imgur.com/kNKIeQZ.gif)
+
+모든걸 새로 만들게 된다면, 랜더링 속도가 굉장히 느려질 것이다. 리액트는 Virtual DOM을 사용하여 이를 가능하게 했다.
+virtual DOM은 브라우저에서 보여지는 DOM이 아니라 메모리에서 가상으로 존재하는 DOM으로 JS객체이기 때문에 속도가 매우 빠르다.
+리액트 개발팀에서 만든 효율적인 비교 알고리즘을 통해 REAL DOM과 비교하여 차이가 있는 곳을 감지하여 REAL DOM에 패치 시켜 준다.
+![react virtual dom](https://i.imgur.com/u6YnxUS.png)
+
+### 1-2. 작업환경 준비
+- Node.js
+- Yarn : npm의 개선된 버전
+- VSCode
+- Git 
+
+### 1-3. 첫번째 리액트 컴포넌트
+Hello.js 컴포넌트 만들기
+
+```js
+import React from 'react'
+
+function Hello() {
+    return <div>hello</div>
+}
+
+export default Hello;
+```
+
+ ![hello.js](src/img/hellojs.PNG)
+
+
+### 1-4. JSX의 기본 규칙 알아보기
+리엑트 컴포넌트에서 XML형태로 코드를 작성하면 babel이 JSX를 JS로 변환해준다.
+
+Babel은 JS 문법을 확장해주는 도구로, 구형 브라우저 환경에서도 최신 JS문법을 제대로 실행할 수 있도록 해준다.
+
+JSX의 몇가지 규칙이 있다.
+- 꼭 감싸져야하는 태그
+두가지 이상의 태그는 무조건 하나의 태그로 감싸져있어야 한다.
+```js
+// 잘못된 예
+function App() {
+  return (
+    <Hello />
+    <div>안녕히계세요.</div>
+  );
+}
+```
+
+```js
+// 정상, <> Fragment 사용
+function App() {
+  return (
+    <> 
+      <Hello />
+      <div>안녕히계세요</div>
+    </>
+  );
+}
+```
+
+- JSX안에 JS사용하기
+JSX 내부에 JS 변수를 사용할 때는 {}로 감싸준다.
+```js
+function App(){
+    const name='react';
+    return (
+        <>
+            <Hello />
+            <div> {name} </div>
+        </>
+    )
+}
+```
+
+- style과 className
+
+style과 ClassName을 설정하는법이 HTML과 다르다.
+먼저, inline 형태로 작성해야하며, background-color와 같이 - 로 구분된 이름은 backgroundColor 처럼 camelCase 형태로 네이밍 해야한다.
+
+css class를 설정 할 경우 class= 가 아닌 className= 으로 해주어한다.
+
+```js
+import './App.css'
+
+function App(){
+    const style = {
+        backgroundColor: 'black',
+        fontSize: 24
+    }
+
+    return {
+        <>
+            <div className="gray-box" style={style} /> 
+        </>
+    }
+}
+```
+
+- 주석
+```js
+{/* */}
+```
+
