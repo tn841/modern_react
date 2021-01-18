@@ -247,7 +247,8 @@ users.filter( user => user.id != id )
 
 
 ### 1-15. 배열에 항목 수정하기
-
+: User 컴포넌트에서 계정이름을 클릭했을 때 색상이 초록색으로 바뀌고, 다시 누르면 검정색으로 바뀌도록 구현해보자.
+: update를 할 때도 [immutable]한 속성을 유지하기위 map() 함수를 사용한다.
 
 ### 1-16. useEffect를 사용하여 mount/unmount/update 시 할 작업 설정하기
 

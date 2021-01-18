@@ -21,17 +21,20 @@ function App() {
     {
         id: 1,
         username: 'name1',
-        email: 'email1.@mail.com'
+        email: 'email1.@mail.com',
+        completed: false
     },
     {
         id: 2,
         username: 'name2',
-        email: 'email2.@mail.com'
+        email: 'email2.@mail.com',
+        completed: true
     },
     {
         id: 3,
         username: 'name3',
-        email: 'email3.@mail.com'
+        email: 'email3.@mail.com',
+        completed: false
     }
   ])
 
@@ -39,7 +42,7 @@ function App() {
   const onCreate = () => {
     setusers([
       ...users,
-      {id: nextID.current, username: username, email: email}
+      {id: nextID.current, username: username, email: email,completed: false}
     ])
 
     // setusers(users.concat({id: nextID.current, username: username, email: email}))
@@ -56,6 +59,21 @@ function App() {
     setusers(users.filter( user => user.id !== id))
   }
 
+  const onComplete = (id) => {
+    setusers(users.map( user => 
+      user.id === id ? {...user, completed: !user.completed} : user
+    ));
+
+    // const newUsers = users.map( user => {
+    //   if(id === user.id){
+    //     return {...user, completed: !user.completed}
+    //   } else {
+    //     return user
+    //   }
+    // })
+    // console.log(newUsers);
+    // setusers(newUsers)
+  }
   return (
     <div>
       <CreateUser  
@@ -64,7 +82,11 @@ function App() {
         onChange={onChange}
         onCreate={onCreate}
       />
-      <UserList users={users} onDelete={onDelete}/>
+      <UserList 
+        users={users} 
+        onDelete={onDelete}
+        onComplete={onComplete}
+      />
     </div>
   );
 }
