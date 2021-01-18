@@ -1,6 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 function User({user, onDelete, onComplete}){
+    useEffect( () => {
+        console.log('user값이 설정됨')
+        console.log(user);
+      
+        return () => {
+          console.log('user가 바뀌기전..')
+          console.log(user)
+        }
+      }, [user]);
     return (
         <div>
             <b 

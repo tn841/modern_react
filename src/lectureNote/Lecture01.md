@@ -216,7 +216,7 @@ setInputs({
 
 
 
-### 1-11. 배열 렌더링하기
+### 1-11. 배열 렌더링하기*
 : JS의 map() 함수를 사용.
 ```js
 users.map( user => <User user={user} />)
@@ -235,10 +235,10 @@ users.map( user => <User user={user} />)
 - scroll 위치
 
 
-### 1-13. 배열에 항목 추가하기
+### 1-13. 배열에 항목 추가하기 *
 : 실습
 
-### 1-14. 배열에 항목 제거하기
+### 1-14. 배열에 항목 제거하기 *
 : User 컴포넌트에 삭제button을 생성하고 삭제 기능 구현
 : setusers()에서 불변성을 유지하며 users list를 수정하기위해 JS의 filter 함수를 사용했다.
 ```js
@@ -246,9 +246,93 @@ users.filter( user => user.id != id )
 ```
 
 
-### 1-15. 배열에 항목 수정하기
+### 1-15. 배열에 항목 수정하기 *
 : User 컴포넌트에서 계정이름을 클릭했을 때 색상이 초록색으로 바뀌고, 다시 누르면 검정색으로 바뀌도록 구현해보자.
 : update를 할 때도 [immutable]한 속성을 유지하기위 map() 함수를 사용한다.
 
-### 1-16. useEffect를 사용하여 mount/unmount/update 시 할 작업 설정하기
+### 1-16. useEffect를 사용하여 mount/unmount/update 시 할 작업 설정하기 **
+- mount : 처음 랜더링 될 때
+- unmount : 사라질 때
+- update : 특정 props가 바뀔 때
+
+useEffect() Hook를 이용한다.
+useEffect의 첫 인자로는 함수, 두번째 인자로는 의존값이 들어있는 배열(deps)을 넣는다.
+두번째 인자(deps) 배열을 비우게 되면, 컴포넌트가 처음 mount될 때만 useEffect에 등록된 함수가 동작한다.
+
+useEffect는 함수를 반환할 수 있다. 이를 cleanup 함수라고 한다.
+deps 배열이 비어있는 경우 컴포넌트가 unmount 될 때 cleanup함수를 호출한다.
+
+mount시에 주로하는 작업은 다음과 같다.
+- props로 받은 값을 컴포넌트의 로컬 상태로 설정
+- 외부 API 요청
+- 라이브러리 사용
+- setInterval(), setTimeout()과 같은 작업
+
+unmoun시에 주로하는 작업은 다음과 같다.
+- setInterval(), setTimeout() clear (clearInterval, clearTimeout)
+- 라이브러리 인스턴스 제거
+
+#### deps 배열에 특정 값넣기
+: deps 배열에 특정 값을 넣으면, mount될 때 useEffect 함수가 호출되고 지정한 값이 바뀔 때에도 호출된다. umountt시에도 호출되고 값이 바뀌기 직전에도 호출된다.??
+
+```js
+...
+useEffect( () => {
+  console.log('user값이 설정됨')
+  console.log(user);
+
+  return () => {
+    console.log('user가 바뀌기전..')
+    console.log(user)
+  }
+}, [user]);
+...
+```
+useEffect() 안에서 사용하는 state나 props가 있다면, 두 번째 인자(deps 배열)에 해당 값을 넣어주어야 한다. 이것은 규칙이다.
+
+#### deps 파라미터를 생략하기
+: deps 파라미터를 생략하면, 컴포넌트가 리랜더링 될 때마다 호출된다.
+
+
+
+### 1-17. useMemo를 사용하여 연산한 값 재사용하기
+: 성능최적화를 위해 연산된 값을 useMemo()라는 Hook을 사용하여 재사용 하는 방법을 알아본다.
+
+이를 위해 App 컴포넌트에서 countCompletedUser 함수를 만들어, complete값이 true인 사용자의 수를 세어 화면에 랜더링해보자.
+
+
+
+### 1-18. useCallback을 사용하여 함수 재사용하기
+
+
+### 1-19. React.memo를 사용한 컴포넌트 리렌더링 방지
+
+
+### 1-20. useReducer를 사용하여 상태업로드 로직 분리하기
+
+
+### 1-21. 커스텀 Hooks 만들기
+
+
+### 1-22. Context API를 사용한 적역 상태값 관리
+
+
+### 1-23. Immer를 사용한 더 쉬운 불변성 관리
+
+
+### 1-24. 클래스형 컴포넌트
+
+
+### 1-25. LifeCycle Method
+
+
+### 1-26. componentDidCatch로 에러 잡아내기 / Sentry 연동
+
+
+### 1-27. 리액트로 개발 할 때 사용하면 편리한 도구들 - Prettier, ESLint, Snippet
+
+
+### 리액트 입문 마무리
+
+
 
