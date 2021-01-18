@@ -217,15 +217,33 @@ setInputs({
 
 
 ### 1-11. 배열 렌더링하기
+: JS의 map() 함수를 사용.
+```js
+users.map( user => <User user={user} />)
+```
+: 리액트에서 배열을 랜더링 할 때에는 'key'라는 props를 설정해야한다.
+
+- key를 미설정한 경우: ![key미설정의경우](https://i.imgur.com/3rkaiY1.gif)
+- key를 설정한 경우 : ![key설정한경우](https://i.imgur.com/yEUS6Bx.gif)
 
 
 ### 1-12. useRef로 컴포넌트 안의 변수 만들기
+: useRef()는 특정 DOM element를 선택하는 용도 외에도, 컴포넌트 안에서 조회 및 수정 할 수 있는 변수를 관리할 수 있다.
+
+- setTimeout, setInterval을 통해서 만들어진 id
+- 외부 라이브러리를 사용하여 생성된 인스턴스
+- scroll 위치
 
 
 ### 1-13. 배열에 항목 추가하기
-
+: 실습
 
 ### 1-14. 배열에 항목 제거하기
+: User 컴포넌트에 삭제button을 생성하고 삭제 기능 구현
+: setusers()에서 불변성을 유지하며 users list를 수정하기위해 JS의 filter 함수를 사용했다.
+```js
+users.filter( user => user.id != id )
+```
 
 
 ### 1-15. 배열에 항목 수정하기
