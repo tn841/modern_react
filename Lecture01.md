@@ -190,12 +190,30 @@ const onIncrement = () => {
 
 
 ### 1-8. input 상태관리하기
-
+: 직접 구현
 
 ### 1-9. 여러개의 input상태 관리하기
+: 여러개의 input 상태를 관리할때, useState를 여러번 사용하여 구현할 수도 있지만, 이는 좋은 방법이 아니다.
+: input에 name 속성을 설정하고 이벤트가 발생했을 때, name 속성을 참조하는 방법이 좋다. useState에서는 문자열이 아니라 input의 상태들을 객체 형태로 관리한다.
 
+- 리액트의 state를 수정할때는 불변성을 유지 해야한다. [immutable]
+```js
+...
+const [inputs, setInputs] = useState({})
+...
+setInputs({
+  ...inputs, //spread문법
+  [name]: value
+})
+...
+```
 
 ### 1-10. useRef로 특정 DOM 선택하기
+: JS에서 특정 DOM을 선택할 때 getElementById()를 사용한다.
+: 리액트에서 특정 DOM을 선택할 때 ref를 사용한다.
+: 함수형 컴포넌트에서는 ref를 사용할 때는 useRef() Hook 함수를 사용한다.
+: useRef()로 ref객체를 만든뒤, 원하는 DOM에 ref속성에 매핑해줘야 한다.
+
 
 
 ### 1-11. 배열 렌더링하기
