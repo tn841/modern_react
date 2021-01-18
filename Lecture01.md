@@ -1,5 +1,4 @@
-# 벨로퍼트와 함께하는 모던 리액트
-: 출처 https://react.vlpt.us/
+
 ## 1장. 리액트 입문
 
 ### 1-1. 리액트는 어쩌다 만들어 졌을까?
@@ -112,4 +111,107 @@ function App(){
 ```js
 {/* */}
 ```
+
+### 1-5. props를 통해 컴포넌트에게 값 전달
+
+```js
+function Hello(props){
+  return <div> hi, {props.name} </div>
+}
+```
+
+- 여러개의 props 비구조화 할당
+
+```js
+// App.js
+...
+function App(){
+  <Hello name="kim" color="blue" />
+}
+...
+```
+
+```js
+// Hello.js
+
+function Hello({name, color}) {
+  return <div style={{color: color}}> {name} </div>
+}
+...
+```
+
+- defaultProps 설정
+```js
+// Hello.js
+...
+Hello.defaultProps = {
+  name: "이름없음"
+}
+...
+```
+
+- props.children
+: 컴포넌트 태그안에 넣은 값을 조회하고 싶을 때, props.children으로 조회한다.(?)
+
+
+
+### 1-6. 조건부 렌더링
+- JSX에서는 null, false, undefined를 렌더링하면 아무것도 나타내지 않는다.
+
+```js
+// 3항 연산자 이용
+{ isSpecial ? <b>*</b> : null }
+
+// && 연산자 이용
+{ isSpecial && <b>*</b> }
+
+```
+
+- props에 값을 생략하면 ={true}와 동일하다.
+
+
+### 1-7. useState를 통해 컴포넌트에서 바뀌는 값 관리하기
+
+: 지금까지는 컴포넌트에 동적인 로직이 하나도 없었다. 이번에는 컴포넌트가 사용자 액션에 따라 동적으로 바뀌어야할때 어떻게 구현하는지 알아본다.
+
+리액트 16.8부터 도입된 Hooks를 이용하여 상태관리를 해본다.
+
+- /src/Counter.js 생성
+- 동적인 상태 관리 : useState()
+- 함수형 업데이트 : 컴포넌트를 최적할 때 사용한다.
+```js
+// Counter.js
+...
+const [number, setnumber] = useState(0)
+const onIncrement = () => {
+  setnumber(prev => prev + 1)
+}
+```
+
+
+### 1-8. input 상태관리하기
+
+
+### 1-9. 여러개의 input상태 관리하기
+
+
+### 1-10. useRef로 특정 DOM 선택하기
+
+
+### 1-11. 배열 렌더링하기
+
+
+### 1-12. useRef로 컴포넌트 안의 변수 만들기
+
+
+### 1-13. 배열에 항목 추가하기
+
+
+### 1-14. 배열에 항목 제거하기
+
+
+### 1-15. 배열에 항목 수정하기
+
+
+### 1-16. useEffect를 사용하여 mount/unmount/update 시 할 작업 설정하기
 
