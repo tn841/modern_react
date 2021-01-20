@@ -394,6 +394,74 @@ const onCreate = useCallback( () => {
 
 
 ### 1-20. useReducer를 사용하여 상태업로드 로직 분리하기
+지금까지 만든 UserList App은 state가 App컴포넌트 내부에서 이루어져있다.
+상태를 변경할 때는 useState()를 이용하였는데, useReducer()를 사용할 수 있다. useReducer() Hook를 사용하면 컴포넌트의 state 관리 로직을 컴포넌트로 부터 분리시킬 수 있다.
+
+reducer는 현재 state와 action 객체를 파라미터로 받아 새로운 state를 반환해주는 함수이다. action객체는 state를 업데이트 하기위한 type과 data들을 가지고 있다.
+
+```js
+function reducer(state, action){
+  // 새로운 state를 만드는 로직
+  return nextState;
+}
+
+const [state, dispatch] = useReducer(Reducer, initialState);
+// dispatch는 액션을 발생시키는 함수
+// 어떤 액션을 발생시키려면 dispatch({'type': 'INCREMENT'})와 같이 사용한다.
+```
+
+먼저 Counter.js 컴포넌트에서 useReducer를 사용해보자
+```js
+import React, [useReducer] from 'react'
+
+function reducer(state, action){
+  switch(action.type){
+    case 'INCREMENT':
+      return state + 1;
+    case 'DECREMENT':
+      return state - 1;
+    default:
+      return state
+  }
+}
+
+const Counter() {
+  const [state, dispatch] = useReducer(reducer, 0);
+
+  const onIncrese = () => {
+    dispatch({type: 'INCREMENT'})
+  }
+
+  const onDecrese = () => {
+    dispatch({type: 'DECREMENT'})
+  }
+
+  return {
+    <div>
+      <h1>{state}</h1>
+      <button onClick={onIncrease}>+1</button>
+      <button onClick={onDecrease}>-1</button>
+    </div>
+  }
+}
+```
+
+#### App컴포넌트를 useReducer()로 구현하기
+1. 먼저 App컴포넌트의 initialState를 컴포넌트 밖으로 분리하고, 내부의 state 변경 로직을 모두 제거한다.
+2. reducer함수의 틀만 만들고, useReducer()를 생성한다.
+3. state에서 필요한 값들을 비구조화 할당 문법으로 추출하여 각 컴포넌트에게 전달해준다.
+```js
+const [state, dispatch] = useReducer(reducer, initialState);
+const {users} = state;
+const {username, nickname} = state;
+```
+4. state처리 함수들(onChange, onCreate, onToggle, onRemove) 구현한다.
+
+#### useState() VS useReducer() 무엇을 써야하나?
+정해진 답은 없다. 상황에 따라 자유롭게 선택해서 사용하면 된다.
+단순한 state 하나를 갖는 컴포넌트인 경우에는 useState가 적절할 것이다.
+여러 state를 사용하는 컴포넌트에서는 useReducer로 관리하는 것이 편할 것이다.
+
 
 
 ### 1-21. 커스텀 Hooks 만들기
