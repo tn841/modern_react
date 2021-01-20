@@ -298,14 +298,99 @@ useEffect() 안에서 사용하는 state나 props가 있다면, 두 번째 인�
 ### 1-17. useMemo를 사용하여 연산한 값 재사용하기
 : 성능최적화를 위해 연산된 값을 useMemo()라는 Hook을 사용하여 재사용 하는 방법을 알아본다.
 
-이를 위해 App 컴포넌트에서 countCompletedUser 함수를 만들어, complete값이 true인 사용자의 수를 세어 화면에 랜더링해보자.
+이를 위해 App 컴포넌트에서 countActiveUser 함수를 만들어, complete값이 true인 사용자의 수를 세어 화면에 랜더링해보자.
+
+: 여기서 발생하는 성능적인 이슈가 한가지 있다. input값을 바꿀때도 countActiveUser 함수가 실행된다는 것이다.
+
+countActiveUser는 users state에 변화가 있을 때만 실행되어야하는데, 아무런 관련없는 inputs state가 변화될 때도 실행되고 있다.
+이런경우에 useMemo() Hook를 사용하여 성능을 최적화 할 수 있다.
+
+```js
+import React, {useRef, useState, useMemo} from 'react'
+...
+const count = useMemo( () => countActiveUsers(users), [users])
+...
+```
+: 첫번째 인자에는 연산을 정의하는 함수, 두번재 인자에는 [deps] 배열을 넣어준다. deps 배열에 넣은 state가 바뀌면, 등록한 첫번재 함수를 호출해서 값을 연산해준다.
 
 
 
-### 1-18. useCallback을 사용하여 함수 재사용하기
+### 1-18. useCallback을 사용하여 함수 재사용하기 ★★
+: useCallback() Hook는 useMemo()와 비슷한 Hook이다.
+useMemo()는 특정 결과값을 재사용 할 때 사용하는 반면, useCallback()은 특정 함수를 새로만들지 않고 재사용하고 싶을 때 사용한다.
+
+: App.js에서 구현한 onCreate(), onDelete(), onComplete() 함수을 확인해보자.
+이 함수들은 컴포넌트가 리랜더링 될 때 마다 새로 만들어진다.
+함수를 새로 선언하는 것은 메모리나 cpu리소스를 많이 차지하지는 않지만 함수를 필요할때만 새로 만들고 재사용하는 것은 여전히 중요하다.
+왜냐하면, 컴포넌트에서 props가 바뀌지 않으면 React의 Virtual DOM에 새로 랜더링하는 것 조차 하지 않고 컴포넌트의 결과물을 재사용하는 최적화 작업을 할 것인데, 이 때 함수 재사용이 필수적이다.
+
+사용법은 다음과 같다.
+
+```js
+import React, {... useCallback} from 'react'
+...
+const onChange = useCallback( e => {
+  //기존 소스코드
+}, [inputs])
+...
+const onCreate = useCallback( () => {
+  //기존 소스코드
+}, [users, username, email])
+```
+
+주의할 점은 함수 안에서 사용하는 state나 props가 있다면, 꼭[deps] 배열에 해당 state나 props를 포함시켜야한다.
+
+사실, useCallback은 useMemo를 기반으로 만들어졌다. 다만, 함수를 위해 사용할 때 더욱 편하게 해주는 것 뿐이다.
+
+useCallback()을 적용하고 바로 최적화가 이루어지지는 않는다. 다음 강의에서 컴포넌트 최적화를 해주어야 성능최적화가 이루어진다.
+그 전에, 어떤 컴포넌트가 랜더링되고 있는지 확인하기위해 'React DevTools' Chrome 확장프로그램을 설치한다.
+![react-devtools](src/img/react_devtools.PNG)
 
 
-### 1-19. React.memo를 사용한 컴포넌트 리렌더링 방지
+
+### 1-19. React.memo를 사용한 컴포넌트 리렌더링 방지 ★★★
+컴포넌트의 props가 바뀌지 않았다면, 리랜더링을 방지하여 컴포넌트의 리랜더링 성능 최적화를 해줄 수 있는 React.memo라는 함수에 대해 알아보자.
+
+React.memo를 사용하면 리랜더링이 필요한 상황에서만 리랜더링을 하도록 설정할 수 있다.
+
+사용법은 다음과 같다.
+```js
+// CreateUser.js
+...
+export default React.memo(CreateUser)
+```
+UserList 컴포넌트와 User컴포넌트에도 동일하게 React.memo를 적용해준다.
+
+적용하고나면 input을 수정할 때 UserList컴포넌트가 리랜더링 되지 않는 것을 확인할 수 있다.
+
+그런데, User중 하나라도 수정하면 모든 User들이 리랜더링되고, CreateUser컴포넌트도 리랜더링 된다.
+이유는 users배열이 수정될 때 마다 onCreate, onToggle, onRemove도 새로 만들어지기 때문이다.
+
+useCallback()의 deps 배열에 users 가 들어있기 때문에 배열이 바뀔때마다 함수가 새로 만들어지는것은 당연하다.
+이것을 최적화하려면 deps배열에서 users를 지우고, useState()로 관리하는 users를 참조하지 않게 바꿔야 한다.
+
+users를 참조하지 않게 바꾸기 위해서는 '함수형 업데이트' 방식을 이용하면 된다. 함수형 업데이트를 하게 되면, setUsers()에 등록하는 콜백함수의 파라미터에서 최신 users를 참조할 수 있기 때문에 deps배열에 users를 넣지 않아도 된다. (??? 이해 안됨)
+
+다음과 같이 각 함수들을 수정해준다.
+```js
+...
+const onCreate = useCallback( () => {
+  const user = {
+    id: nextId.current,
+    username,
+    email
+  }
+  setUser( (users) => users.concat(user)); //함수형 업데이트
+}, [username, email]);
+```
+
+리액트 개발자 도구의 버그인지, CreateUser 도 렌더링 되는것처럼 보이는데 실제로 console.log 찍어보시면 렌더링이 안되고 있는 것을 확인 할 수 있습니다.
+
+리액트 개발을 하실 때, useCallback, useMemo, React.memo 는 컴포넌트의 성능을 실제로 개선할수있는 상황에서만 하세요.
+
+예를 들어서, User 컴포넌트에 b 와 button 에 onClick 으로 설정해준 함수들은, 해당 함수들을 useCallback 으로 재사용한다고 해서 리렌더링을 막을 수 있는것은 아니므로, 굳이 그렇게 할 필요 없습니다.
+
+추가적으로, 렌더링 최적화 하지 않을 컴포넌트에 React.memo 를 사용하는것은, 불필요한 props 비교만 하는 것이기 때문에 실제로 렌더링을 방지할수있는 상황이 있는 경우에만 사용하시길바랍니다.
 
 
 ### 1-20. useReducer를 사용하여 상태업로드 로직 분리하기

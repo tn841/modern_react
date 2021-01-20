@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react'
 
-function User({user, onDelete, onComplete}){
+const User = React.memo( function User({user, onDelete, onComplete}){
     useEffect( () => {
-        console.log('user값이 설정됨')
-        console.log(user);
+        // console.log('user값이 설정됨')
+        // console.log(user);
       
         return () => {
-          console.log('user가 바뀌기전..')
-          console.log(user)
+        //   console.log('user가 바뀌기전..')
+        //   console.log(user)
         }
       }, [user]);
     return (
@@ -26,7 +26,7 @@ function User({user, onDelete, onComplete}){
             <button onClick={ () => onDelete(user.id)}>삭제</button>
         </div>
     )
-};
+});
 
 function UserList({users, onDelete, onComplete}){
 
@@ -44,4 +44,4 @@ function UserList({users, onDelete, onComplete}){
     )
 }
 
-export default UserList;
+export default React.memo(UserList);
