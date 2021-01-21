@@ -36,7 +36,7 @@ function Hello() {
 export default Hello;
 ```
 
- ![hello.js](src/img/hellojs.PNG)
+ ![hello.js](../img/hellojs.PNG)
 
 
 ### 1-4. JSX의 기본 규칙 알아보기
@@ -344,7 +344,7 @@ const onCreate = useCallback( () => {
 
 useCallback()을 적용하고 바로 최적화가 이루어지지는 않는다. 다음 강의에서 컴포넌트 최적화를 해주어야 성능최적화가 이루어진다.
 그 전에, 어떤 컴포넌트가 랜더링되고 있는지 확인하기위해 'React DevTools' Chrome 확장프로그램을 설치한다.
-![react-devtools](src/img/react_devtools.PNG)
+![react-devtools](../img/react_devtools.PNG)
 
 
 
