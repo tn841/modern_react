@@ -568,6 +568,180 @@ useReducer를 사용하면, dispatch를 ContextAPI에 전역 value로 설정하�
 
 
 ### 1-23. Immer를 사용한 더 쉬운 불변성 관리
+래익트에서 배열이나 객체를 업데이트 할때는 불변성을 지켜주면서 업데이트 해주어야 한다.
+```js
+const object = {
+  a: 1,
+  b: 2
+};
+
+// 불변성을 해치는 예
+object.b = 3
+
+// 불변성을 지키는 예
+const newObejct = {
+  ...object,
+  b: 3
+}
+```
+
+배열을 수정할 때도 slice, push로 불변성을 해치면 안되고,
+filter, map, concat 등의 함수로 불변성을 유지해야한다.
+```js
+const todos = [
+  {
+    id: 1,
+    text: '할일1'
+  },
+  {
+    id: 2,
+    text: '할일2'
+  }
+]
+
+// 배열 추가
+const addTodos = [
+  ...todos,
+  {id: 3, text: '할일3'}
+]
+
+// 배열 필터링
+const filteredTodo = todos.filter( todo => todo.id === 1)
+
+// 배열 수정
+const toggleTodo = todos.map( todo => todo.id === 2 ? {...todo, text: "완료"} : todo})
+```
+
+데이터의 구조가 복잡해지면 불변성을 유지하며 데이터를 관리하는 것이 어려워진다.
+```js
+const state = {
+  posts: [
+    {
+      id: 1,
+      title: '제목입니다.',
+      body: '내용입니다.',
+      comments: [
+        {
+          id: 1,
+          text: '와 정말 잘 읽었습니다.'
+        }
+      ]
+    },
+    {
+      id: 2,
+      title: '제목입니다.',
+      body: '내용입니다.',
+      comments: [
+        {
+          id: 2,
+          text: '또 다른 댓글 어쩌고 저쩌고'
+        }
+      ]
+    }
+  ],
+  selectedId: 1
+};
+```
+posts 배열에서 id가 1인 post의 comments에 새로운 댓글을 추가하는 경우,
+```js
+const nextState = {
+  ...state,
+  posts: state.posts.map( post => post.id === 1 ? {
+    ...post,
+    comments: post.comments.concat({
+      id: 3,
+      text: '새로운 댓글'
+    })
+  } : post)
+}
+```
+
+복잡하기도 하고 코드의 가독성이 떨어지기도 한다.
+이럴 때, immer라는 라이브러리를 사용하면 아래와 같이 구현할 수 있다. immer를 사용하면 불변성에 신경쓰지 않아도 된다. immer가 불변성 관리를 대신 해준다.
+
+```js
+const nextState = produce(state, draft => {
+  const post = draft.posts.find(post => post.id == 1);
+  post.comments.push({
+    id:3,
+    text: '새로운 댓글'
+  })
+})
+```
+
+
+#### Immer 사용법
+우선 프로젝트에 immer 를 설치한다.
+```js
+npm install immer
+```
+
+immer를 import해준다. 보통 produce라는 이름으로 불러온다.
+```js
+import produce from 'immer'
+
+const state = {
+  number: 1,
+  dontChangeMe:2
+}
+
+const nextState = produce(state, draft => {
+  draft.number += 1;
+})
+```
+produce() 함수의 첫번째 인자는 수정하고자 하는 state, 두번째 인자는 어떻게 수정할지 정의하는 함수를 넣어준다.
+
+
+#### reducer함수에서 Immer 사용하기
+App.js의 reducer함수에서 immer produce를 사용해보자.
+
+
+#### Immer와 함수형 업데이트
+useState를 사용할 때 함수형 업데이트를 할 수 있다고 배웠다.
+```js
+const [todo, setTodo] = useState({text: 'Hello', done: false})
+const onClick = useCallback( () => {
+  setTodo( (todo) => {
+    ...todo,
+    done: !todo.done
+  })
+}, [])
+```
+이렇게 setTodo() 함수에 '함수형 업데이트 함수'를 넣음으로써, useCallback의 deps 배열에 todo를 넣지 않아도 되게 된다.
+
+이렇게 '함수형 업데이트'를 사용하는 경우에 Immer를 사용하면 상황에 따라 더 편하게 코드를 작성할 수 있다.
+
+
+produce 함수에 두개의 파라미터를 넣게 된다면, 첫번째 파라미터에 넣은 상태를 불변성을 유지하면서 새로운 상태를 만들어주지만(불변성유지), 만약에 첫번째 파라미터를 생략하고 바로 업데이트 함수를 넣어주게 된다면, 반환 값은 새로운 상태가 아닌 상태를 업데이트 해주는 함수가 된다.(불변성파괴?) 설명으로 이해하기가 조금 어려울 수 있는데 코드를 보면 조금 더 이해가 쉬워집니다.
+
+```js
+const updater = produce(draft => {
+  draft.done = !draft.done;
+});
+const nextTodo = updater(todo);
+```
+produce 가 반환하는것이 업데이트 함수가 되기 때문에 useState 의 업데이트 함수를 사용 할 떄 다음과 같이 구현 할 수 있게 된다.
+
+```js
+const [todo, setTodo] = useState({
+  text: 'Hello',
+  done: false
+});
+
+const onClick = useCallback(() => {
+  setTodo(
+    produce(draft => {
+      draft.done = !draft.done;
+    })
+  );
+}, []);
+```
+
+
+#### 성능
+Immer 라이브러리는 확실히 편하기 때문에, 데이터의 구조가 복잡해져서 불변성을 유지하면서 업데이트하려면 코드가 복잡해지는 상황이 온다면, 이를 사용하는 것을 권장드립니다.
+
+다만, 무조건 사용을 하진 마시고, 가능하면 데이터의 구조가 복잡해지게 되는 것을 방지하세요. 그리고 어쩔 수 없을 때 Immer 를 사용하는것이 좋습니다. Immer 를 사용한다고 해도, 필요한곳에만 쓰고, 간단히 처리 될 수 있는 곳에서는 그냥 일반 JavaScript 로 구현하시길 바랍니다.
 
 
 ### 1-24. 클래스형 컴포넌트
