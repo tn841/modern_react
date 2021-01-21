@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useContext } from 'react'
+import { UserDispatch } from './App'
 
-const User = React.memo( function User({user, onDelete, onComplete}){
+const User = React.memo( function User({user}){
     useEffect( () => {
         // console.log('user값이 설정됨')
         // console.log(user);
@@ -9,7 +10,10 @@ const User = React.memo( function User({user, onDelete, onComplete}){
         //   console.log('user가 바뀌기전..')
         //   console.log(user)
         }
-      }, [user]);
+    }, [user]);
+
+    const dispatch = useContext(UserDispatch);
+
     return (
         <div>
             <b 
@@ -17,13 +21,19 @@ const User = React.memo( function User({user, onDelete, onComplete}){
                     color: user.completed ? 'green' : 'black',
                     cursor: 'pointer'
                 }} 
-                onClick={() => onComplete(user.id)}
+                onClick={() => {
+                    dispatch({type: 'TOGGLE_USER', id: user.id});
+                }}
             >
                     {user.username}
             </b>
             &nbsp;
             <span>({user.email})</span>
-            <button onClick={ () => onDelete(user.id)}>삭제</button>
+            <button onClick={ () => {
+                dispatch({type: 'REMOVE_USER', id: user.id})
+            }}>
+                삭제
+            </button>
         </div>
     )
 });
@@ -36,8 +46,6 @@ function UserList({users, onDelete, onComplete}){
                 <User 
                     user={user} 
                     key={user.id} 
-                    onDelete={onDelete} 
-                    onComplete={onComplete}
                 />
             ))}
         </div>

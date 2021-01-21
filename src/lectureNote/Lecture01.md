@@ -516,20 +516,54 @@ Context API를 사용해서 새로운 Context를 만드는 방법을 알아본�
 const UserDispatch = React.createContext(null)
 ```
 React.createContext()의 인자로는 초기값을 지정할 수 있다.
-Context를 만들면 Context안에 Provider라는 컴포넌트가 들어있는데, 이 Provider 컴포넌트의 value 속성을 통해 Context의 값을 정할 수 있다.
+Context를 만들면 Context안에 Provider라는 컴포넌트가 들어있는데, 이 Provider 컴포넌트의 value 속성을 통해 전역적으로 사용하고자 하는 Context의 값을 지정할 수 있다.
 ```js
-<UserDispatch.Provider value={dispatch}> ... </UserDispatch.Provider>
+<UserDispatch.Provider value={dispatch}> 
+  ... 
+</UserDispatch.Provider>
 ```
-이렇게 설정해주면 UserDispatch 컴포넌트 중 어디서든지 Context의 값을 바로바로 조회해서 사용할 수 있다.
+이렇게 설정해주면 UserDispatch 컴포넌트 하위의 어떤 컴포넌트에서든지 Context의 값을 바로바로 조회해서 사용할 수 있다.
 
 
 이제 App컴포넌트에 Context를 만들고 사용하고 내보내는(export) 작업을 해보자.
 App컴포넌트에서 만들 Context는 UserDispatch로, 어디서든지 dispatch()를 사용할 수 있도록 해준다.
 
 ```js
-
+export const UserDispatch = React.createContext(null);
+...
+return(
+  <UserDispatch.Provider value={dispatch}>
+    ...
+  </UserDispatch.Provider>
+)
 ```
 UserDispatch Context를 생성하였으면, App 컴포넌트에서 onToggle() onRemove() 함수를 지우고 UserList의 props에 전달하는 소스도 지워준다.
+
+
+이제 User 컴포넌트에서 바로 dispatch를 사용한다. useContext() Hooks를 이용해서 전에 만든 UserDispatch Context를 가져온다.
+```js
+// UserList.js
+import React, {useContext} from 'react'
+import { UserDispatch } from './App'
+...
+const dispatch = useContext(UserDispatch);
+...
+onClick={ ()=> {dispatch({type:'TOGGLE_USER', id: user.id})}}
+...
+```
+
+#### 숙제
+User 컴포넌트에게 따로 onToggle / onRemove 를 props로 전달하지 않고 바로 dispatch 를 사용했던 것 처럼, CreateUser 컴포넌트에서도 dispatch 를 직접 하도록 구현을 해보세요.
+
+- CreateUser 에게는 아무 props 도 전달하지 마세요.
+- CreateUser 컴포넌트 내부에서 useInputs 를 사용하세요.
+- useRef 를 사용한 nextId 값을 CreateUser 에서 관리하세요.
+
+
+
+이로써, useState를 사용하는 것과 useReducer를 사용하는 것의 차이를 발견했는지요?
+useReducer를 사용하면, dispatch를 ContextAPI에 전역 value로 설정하여 하위 컴포넌트들에서 자유롭게 사용할 수 있게 함으로써 코드를 깔끔하게 관리할 수 있다.
+
 
 
 

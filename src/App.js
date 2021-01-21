@@ -1,8 +1,8 @@
-import React, {useCallback, useMemo, useReducer, useRef} from 'react'
+import React, {useMemo, useReducer} from 'react'
 import UserList from './UserList'
 import CreateUser from './CreateUser'
 // import useInputs from './hooks/useInputs'
-import useInputsReducer from './hooks/useInputsReducer'
+// import useInputsReducer from './hooks/useInputsReducer'
 
 const initialState = {
     // inputs: {
@@ -71,21 +71,22 @@ function countActiveUser(users){
     return users.filter( user => user.completed).length;
 }
 
+export const UserDispatch = React.createContext(null);
+
 function App(){
     // const [inputs, onChange, reset] = useInputs({
     //     username: '',
     //     email: ''
     // })
 
-    const [inputState, onChange, reset] = useInputsReducer({
-        username: '',
-        email: ''
-    })
-    const {username, email} = inputState
+    // const [inputState, onChange, reset] = useInputsReducer({
+    //     username: '',
+    //     email: ''
+    // })
+    // const {username, email} = inputState
     
 
     const [state, dispatch] = useReducer(reducer, initialState);
-    const nextUserId = useRef(4)
     const {users} = state;
 
     // input관련 로직은 useInputs Hooks로 대체한다.
@@ -99,45 +100,45 @@ function App(){
     // }, [])
 
     
-    const onCreate = useCallback( () => {
-        const user = {
-            id: nextUserId.current,
-            username,
-            email,
-            completed: false
-        }
-        dispatch({type: 'CREATE_USER', user})
-        reset();
-        nextUserId.current += 1;
+    // const onCreate = useCallback( () => {
+    //     const user = {
+    //         id: nextUserId.current,
+    //         username,
+    //         email,
+    //         completed: false
+    //     }
+    //     dispatch({type: 'CREATE_USER', user})
+    //     reset();
+    //     nextUserId.current += 1;
         
-    }, [username, email, reset])
+    // }, [username, email, reset])
 
-    const onToggle = useCallback( id => {
-        dispatch({type: 'TOGGLE_USER', id})
-    }, [])
-
-    const onRemove = useCallback( id => {
-        dispatch({type: 'REMOVE_USER', id})
-    }, [])
+    // React.createContext로 대체
+    // const onToggle = useCallback( id => {
+    //     dispatch({type: 'TOGGLE_USER', id})
+    // }, [])
+    // const onRemove = useCallback( id => {
+    //     dispatch({type: 'REMOVE_USER', id})
+    // }, [])
 
     const userCount = useMemo( ()=> countActiveUser(users), [users])
 
     return (
-        <div>
-            <CreateUser 
-                username={username} 
-                email={email}
-                onChange={onChange}
-                onCreate={onCreate}
-            />
+        <UserDispatch.Provider value={dispatch}>
+                <CreateUser 
+                    // username={username} 
+                    // email={email}
+                    // onChange={onChange}
+                    // onCreate={onCreate}
+                />
             <UserList 
                 users={users}
-                onComplete={onToggle}
-                onDelete={onRemove}
+                // onComplete={onToggle}    // React.createContext로 대체
+                // onDelete={onRemove}
             />
             <span>Active user : {userCount}</span>
-        </div>
+        </UserDispatch.Provider>
     )
-}
+} 
 
 export default App;
