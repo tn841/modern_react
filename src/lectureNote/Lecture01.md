@@ -501,7 +501,36 @@ useInputs Hooks를 사용하기 위해 useReudcer()에서 사용하는 inputs을
 useInputs Hooks를 useState대신 useReducer를 사용하여 구현해보시오.
 
 
-### 1-22. Context API를 사용한 적역 상태값 관리
+### 1-22. Context API를 사용한 전역 상태값 관리
+현재까지 만든 App 컴포넌트를 살펴보면, App 컴포넌트에서 onToggle, onRemove가 구현되어 있고 이 함수들은 UserList 컴포넌트를 거쳐 User컴포넌트로 전달되고 있다.
+
+
+여기서 UserList 컴포넌트는 함수를 전달하기위한 중간 다리 역할만 하고 있다. 이러한 중간 다리 역할만 하는 컴포넌트는 자주 만나게 된다. 만약 중간다리 역할을 하는 컴포넌트가 3~4개 이상으로 많아진다면, 함수를 전달하는 작업은 매우 번거로울 것이다.
+
+
+이럴땐 리액트의 Context API를 사용하여 프로젝트 안에서 전역적으로 "값"을 관리를 할 수 있다. "상태"가 아닌 "값" 이라고한 이유는 꼭 "상태"를 가르키지 않아도 되기 때문이다. 이 값은 함수일 수도, 외부 라이브러리의 인스턴스 이거나 DOM 객체일 수 있다.
+
+
+Context API를 사용해서 새로운 Context를 만드는 방법을 알아본다.
+```js
+const UserDispatch = React.createContext(null)
+```
+React.createContext()의 인자로는 초기값을 지정할 수 있다.
+Context를 만들면 Context안에 Provider라는 컴포넌트가 들어있는데, 이 Provider 컴포넌트의 value 속성을 통해 Context의 값을 정할 수 있다.
+```js
+<UserDispatch.Provider value={dispatch}> ... </UserDispatch.Provider>
+```
+이렇게 설정해주면 UserDispatch 컴포넌트 중 어디서든지 Context의 값을 바로바로 조회해서 사용할 수 있다.
+
+
+이제 App컴포넌트에 Context를 만들고 사용하고 내보내는(export) 작업을 해보자.
+App컴포넌트에서 만들 Context는 UserDispatch로, 어디서든지 dispatch()를 사용할 수 있도록 해준다.
+
+```js
+
+```
+UserDispatch Context를 생성하였으면, App 컴포넌트에서 onToggle() onRemove() 함수를 지우고 UserList의 props에 전달하는 소스도 지워준다.
+
 
 
 ### 1-23. Immer를 사용한 더 쉬운 불변성 관리
