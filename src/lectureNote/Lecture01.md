@@ -344,7 +344,7 @@ const onCreate = useCallback( () => {
 
 useCallback()을 적용하고 바로 최적화가 이루어지지는 않는다. 다음 강의에서 컴포넌트 최적화를 해주어야 성능최적화가 이루어진다.
 그 전에, 어떤 컴포넌트가 랜더링되고 있는지 확인하기위해 'React DevTools' Chrome 확장프로그램을 설치한다.
-![react-devtools](src/img/react_devtools.PNG)
+![react-devtools](./img/react_devtools.PNG)
 
 
 
@@ -465,6 +465,40 @@ const {username, nickname} = state;
 
 
 ### 1-21. 커스텀 Hooks 만들기
+컴포넌트를 개발하다보면, 반복적인 작업이 자주 발생한다. 예를 들어 input을 관리하는 코드는 비슷한 작업이 매번 반복된다.
+커스텀 Hooks를 만들어 반복되는 작업을 쉽게 재사용할 수 있다.
+
+
+src/hooks 디렉토리를 만들고, 그 안에 useInput.js를 생성한다.
+커스텀 Hooks를 생성할때는 보통 use~~~.js 이렇게 네이밍 한다.
+
+
+커스텀 Hooks를 실제로 구현하는 것은 매우 간단하다. 함수에 원하는 로직을 구현하고 컴포넌트에서 사용하고 싶은 값들을 반환해주면 된다.
+
+```js
+// src/hooks/useInputs.js
+import {useState, useCallback} from 'react';
+
+function useInputs(initialForm){
+    const [form, setForm] = useState(initialForm);
+
+    const onChange = useCallback( (e) => {
+        const {name, value} = e.target;
+        setForm( form => ({...form, [name]: value}) );
+    }, [])
+
+    const reset = useCallback( ()=> setForm(initialForm), [initialForm]);
+    return [form,onChange, reset]
+}
+
+export default useInputs
+```
+
+우리가 만든 커스텀 Hooks를 App.js에서 사용해보자.
+useInputs Hooks를 사용하기 위해 useReudcer()에서 사용하는 inputs을 없애고 inputs과 관련된 작업을 useInputs Hooks로 대체해주어야 한다.
+
+#### 숙제
+useInputs Hooks를 useState대신 useReducer를 사용하여 구현해보시오.
 
 
 ### 1-22. Context API를 사용한 적역 상태값 관리
