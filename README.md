@@ -5,9 +5,9 @@
 
 ### [1. 리액트 입문](src/lectureNote/Lecture01.md)
 
-### [2. 리액트 컴포넌트 스타일링하기](src/lectureNote/Lectrue02.md)
+### [2. 리액트 컴포넌트 스타일링하기](src/lectureNote/Lecture02.md)
 
-### [3. 멋진 todoList 만들기](src/lectureNote/Lectrue03.md)
+### [3. 멋진 todoList 만들기](src/lectureNote/Lecture03.md)
 
 ### [4. API 연동하기](src/lectureNote/Lecture04.md)
 
