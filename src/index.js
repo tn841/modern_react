@@ -2,12 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 // import App from './App';
-import AppSass from './AppSass'
+// import AppSass from './AppSass'
+import AppStyled from './AppStyled'
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <AppSass />
+    <AppStyled />
   </React.StrictMode>,
   document.getElementById('root')
 );
