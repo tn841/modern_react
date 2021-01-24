@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styled, { ThemeProvider } from 'styled-components';
 import ButtonStyled from './components/ButtonStyled'
+import Dialog from './components/Dialog';
 
 const AppBlock = styled.div`
     width: 512px;
@@ -17,6 +18,16 @@ const ButtonBlock =  styled.div`
 `;
 
 function AppStyled() {
+    const [visible, setVisible] = useState(false);
+
+    const onCancel = () => {
+        setVisible(false)
+    };
+
+    const onConfirm = () => {
+        setVisible(false)
+    }
+
     return (
         <ThemeProvider
             theme={{
@@ -27,6 +38,7 @@ function AppStyled() {
                 }
             }}
         >
+            <>
             <AppBlock>
             <ButtonBlock>
                     <ButtonStyled color='pink' size='large'>BUTTON</ButtonStyled>
@@ -49,11 +61,27 @@ function AppStyled() {
                     <ButtonStyled outline  size='small'>BUTTON</ButtonStyled>
                 </ButtonBlock>
                 <ButtonBlock>
-                    <ButtonStyled outline fullWidth color='gray' >BUTTON</ButtonStyled>
+                    <ButtonStyled 
+                        outline 
+                        fullWidth 
+                        color='gray' 
+                        onClick={() => {setVisible(true)}}
+                    >
+                        REAL BUTTON
+                    </ButtonStyled>
                 </ButtonBlock>
-                
-                
             </AppBlock>
+            <Dialog 
+                title='dialog title' 
+                confirmText='확인' 
+                cancelText='취소'
+                onCancel={onCancel}
+                onConfirm={onConfirm}
+                visible={visible}
+            >
+                내용
+            </Dialog>
+            </>
         </ThemeProvider>
     )
 }

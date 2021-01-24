@@ -404,8 +404,69 @@ Sass에서 구현했던 재사용성 높은 Button 컴포넌트를 styled-compon
 - size props를 설정하여 버튼 크기 설정
     - size관련 함수를 별도로 생성하여 코드를 분리시켜준다.
     - sizeStyles 함수에서 중복되는 코드 리팩토링
-- outline 옵션, fullWidth 옵션 추가
+- outline 옵션, fullWidth 옵션 추가 
+-   ![](../img/styledComp04.PNG)
 
 
 ### Dialog 만들기
--  
+화면을 dimmed 처리하면서 정보를 보여주는 Dialog 컴포넌트를 만들어보자.
+
+- /src/compoents/Dialog.js 컴포넌트 생성
+- nested-css 사용 가능
+- styled-components 커스터 마이징 하기
+    - 컴포넌트의 스타일을 커스터마이징 할 때에는 해당 컴포넌트에서 className props 를 내부 엘리먼트에게 전달이 되고 있는지 확인해야한다. 우리는 ...rest로 전달하고 있다.
+- Dialog 버튼 기능 구현
+    - onConfirm
+    - onCancel
+    - visible
+- App.js에서 useState로 visible state 관리
+- props 전달
+~[](../img/styledComp05.PNG)
+
+
+### Dialog 트랜지션 구현
+트랜지션 효과를 적용 할 때에는 [CSS Keyframe](https://developer.mozilla.org/ko/docs/Web/CSS/@keyframes) 을 사용하며, styled-components 에서 이를 사용 할 때에는 [keyframes](https://www.styled-components.com/docs/api#keyframes) 라는 유틸을 사용한다.
+
+- Dialog가 나타날때는 DarkBackground에 fadeIn 효과를 주고, DialogBlock에는 slideUp 효과를 주도록 한다.    
+```js 
+import styled, {keyframes} from 'styled-components'
+...
+const fadeIn = keyframes`
+    from { opacity: 0 }
+    to { opacity: 1}
+`;
+
+const slideUp = keyframes`
+    from {
+        transform: translateY(200px);
+    }
+    to {
+        transform: translateY(0px);
+    }
+`;
+const DarkBackground = styled.div`
+    ...
+
+    animation-duration: 0.25s;
+    animation-timing-function: ease-out;
+    animation-name: ${fadeIn};
+    animation-fill-mode: forwards;
+`;
+
+const DialogBlock = styled.div`
+    ...
+
+    animation-duration: 0.25s;
+    animation-timing-function: ease-out;
+    animation-name: ${slideUp};
+    animation-fill-mode: forwards;
+`;
+...
+```
+- Dialog가 사라지는 효과를 구현하기 위해서는 Dialog 컴포넌트에서 두개의 local state를 관리해준다.
+    - 애니매이션 효과를 보여주고 있는 중 state - animate
+    - 컴포넌트가 사라지는 시점을 지연시키기위한 state - localVisible
+- useEffect로 visible state가 ture -> false로 바뀌는 시점을 감지하여 animate state를 true로 바꿔주고 setTimeout 함수를 사용하여 250ms 이후 false로 바꾸어 주어야한다.
+- 추가적으로, !visible 조건에서 null 를 반환하는 대신에 !animate && !localVisible 조건에서 null 을 반환하도록 수정한다.
+- DarkBackground 와 DialogBlock 에 disappear 라는 props 를 주어서 사라지는 효과가 나타나도록 설정
+![](https://i.imgur.com/qgKmhsH.gif)
