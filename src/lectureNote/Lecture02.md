@@ -8,7 +8,7 @@
 
 재사용성이 높은 버튼을 만드는 방법, 커스텀 체크 박스를 만드는 방법, 그리고 모달을 만드는 방법을 알아보겠습니다.
 
-### 2-1. Sass (Syntactically Awesome Style Sheets.) - 문법적으로 짱 멋찐 스타일시트
+## 2-1. Sass (Syntactically Awesome Style Sheets.) - 문법적으로 짱 멋찐 스타일시트
 Sass는 CSS pre-processor로서, 복잡한 작업을 쉽게 할 수 있게 해주고, 코드의 재활용성을 높여줄 뿐만아리가, 코드의 가독성을 높여주어 유지보수를 쉽게 해준다.
 
 Sass에 대해서 제대로 알아보고 싶다면 아래 링크를 참조한다.
@@ -221,3 +221,49 @@ function Button({children, size, color, outline, fullWidth, ...rest}){
 ```
 
 주로 state객체를 다룰 때 사용했던 spread문법을 컴포넌트에서 props 설정할 때 사용할 수 도 있다.
+
+
+## 2-2. CSS Module
+리액트 프로젝트에서 컴포넌트를 스타일링 할 때 CSS Module이라는 기술을 사용하면, CSS 클래스가 중첩되는 것을 방지할 수 있다.
+
+CRA로 만든 프로젝트에서 CSS Module을 사용 할 때, CSS 파일의 확장자를 .moudule.css로 하면된다. ex) Box.module.css
+```css
+.Box {
+    background: black;
+    color: white;
+    padding: 2rem;
+}
+```
+리액트 컴포넌트에서 .modules.css를 불러올 때 .modules.css에 선언한 클래스 이름들이 모두 고유해집니다. 고유 CSS 클래스 이름이 만들어지는 과정에서는 파일 경로, 이름, 클래스 이름, 해쉬값 등이 사용될 수 있다.
+```js
+import React from 'ract'
+import styles from './Box.module.css'
+
+function Box(){
+    return (
+        <div className={styles.Box}>{styles.Box}</div>
+    )
+}
+export default Box;
+```
+className이 고유하게 만들어지기 때문에, 실수로 CSS의 클래스 이름이 다른 CSS클래스 이름과 중복이될 일이 없다.
+
+이 기술은 다음과 같은 상황에서 유용하다.
+- 레거시 프로젝트에 리액트를 도입할때, 기존 CSS의 클래스 이름과 리액트에서 도입한 CSS 클래스 이름이 중복되지 않는다.
+- CSS 네이밍 규칙을 만들기 귀찮을 때
+
+CSS Module은 CRA로 만들 프로젝트에서는 별도로 설치할 라이브러리가 없다. CSS Module은 Webpack 에서 사용하는 [css-loader](https://github.com/webpack-contrib/css-loader)에서 지원한다.
+
+### 기타 내용
+CSS Module은 Sass에서도 사용할 수 있다. 확장자를 .module.sass로 바꿔주면 된다.
+
+CSS Module을 사용하고 있는 파일에서 특정 클래스 이름을 고유화 하지 않고 전역적인 클래스 이름으로 사용하고 싶다면 다음과 같이 작성하면 된다.
+```css
+// CSS
+:global .my-global-name {}
+
+// Sass
+:global {
+    .my-global-name {}
+}
+```
