@@ -26,14 +26,21 @@ const TodoHeadBlock = styled.div`
       }
 `;
 
+const countTodo = (todos) => {
+    return todos.filter(todo => !todo.done).length
+}
+
 function TodoHead() {
     const todos = useTodoState();
-    console.log(todos);
+    const date = new Date().toDateString()
+
+    const count = countTodo(todos)   
+
     return (
         <TodoHeadBlock>
-            <h1>2021년 1월 25일</h1>
+            <h1>{date}</h1>
             <div className='day'>월요일</div>
-            <div className='tasks-left'>할 일 0개 남음</div>
+            <div className='tasks-left'>할 일 {count}개 남음</div>
         </TodoHeadBlock>        
     )
 }
