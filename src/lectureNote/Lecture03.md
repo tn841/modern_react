@@ -46,6 +46,106 @@ styled-components를 사용하여 페이지에 회색(#e9ecef) 배경색상을 �
 ![todo](../img/Todo02.PNG)
 
 ## 3-2. Context API를 활용한 상태관리
+TodoList App에서 기본적인 상태 관리는 다음과 같은 구조로 구현된다.
+![](https://i.imgur.com/hX8jjXG.png)
+App 컴포넌트에서 todos, onRemove, onToggle ... 상태과 함수들을 가지고 있고, 해당 값을 props를 통해 자식 컴포넌트들에게 전달해주는 방식으로 구현한 예시이다.
+
+하지만 프로젝트가 커지면 위와 같은 상태관리는 
+- App 컴포넌트 코드가 복잡짐
+- 자식 컴포넌트의 props로 값이나 함수를 전달하기 어려워짐
+과 같은 문제가 발생한다.
+
+따라서, Context API를 활용하여 상태 또는 함수 관리를 깔끔하게 할 수 있다.
+![](https://i.imgur.com/lYiiIZF.png)
+
+### 리듀서 만들기
+state 관리를 위해 /src/TodoContext.js 파일을 생성하고 TodoProvider 라는 컴포넌트를 만든다.
+- useReducer()로 상태를 관리한다.
+- initialState를 정의한다.
+- reducer() 함수를 작성한다. (CREATE, TOGGLE, REMOVE)
+- TodoProvider 컴포넌트는 UI가 없다.
+
+
+### Context 만들기
+- createContext()로 전역에서 관리한 state 또는 함수를 설정한다.
+- 하나의 context에 state와 dispatch를 함께 넣어주는 대신 각각의 context에 state와 dispatch를 따로 설정한다. 이렇게하면 dispatch만 필요한 컴포넌트에서 불필요한 랜더링을 방지할 수 있다.
+```js
+...
+const TodoStateContext = createContext();
+const TodoDispatchContext = createContext();
+...
+return (
+    <TodoStateContext.Provider value={state}>
+      <TodoDispatchContext.Provider value={dispatch}>
+        {children}
+      </TodoDispatchContext.Provider>
+    </TodoStateContext.Provider>
+  );
+```
+
+
+### 커스텀 Hook 만들기
+컴포넌트에서 useContext로 context값에 접근하는 방식 대신, useContext를 사용하는 커스텀 Hook를 만들어 context값에 접근하도록 만들어보자.
+```js
+...
+export function useTodoState() {
+  return useContext(TodoStateContext);
+}
+
+export function useTodoDispatch() {
+  return useContext(TodoDispatchContext);
+}
+```
+기능적으로 차이는 없고, 단순히 사용성 편의를 위한 작업이다.
+
+
+
+### nextId 값 관리하기
+useRef()를 사용하여 todo의 고유 ID를 관리한다.
+
+
+
+### 커스텀 Hook에서 에러 처리
+필수 사항은 아니지만, context에 접근할 수 없는 곳에서 context를 호출 했을 경우 실수를 빠르게 확인할 수 있다.
+```js
+export function useTodoState() {
+  const context = useContext(TodoStateContext);
+  if (!context) {
+    throw new Error('Cannot find TodoProvider');
+  }
+  return context;
+}
+```
+
+
+
+### 컴포넌트 TodoProvider로 감싸기
+AppTodo.js 에서 컴포넌트 최상단에 모든 하위 컴포넌트를 감싸도록 TodoProvider를 위치 시킨다.
+```js
+function App() {
+  return (
+    <TodoProvider>
+      <GlobalStyle />
+      <TodoTemplate>
+        <TodoHead />
+        <TodoList />
+        <TodoCreate />
+      </TodoTemplate>
+    </TodoProvider>
+  );
+}
+```
+
+
+### 각 컴포넌트에서 사용하기
+TodoHead 컴포넌트에서 todos state가 필요한 경우 다음과 같이 useTodoState 커스텀 Hook를 통해 전역 state 값을 불러올 수 있다.
+```js
+...
+import { useTodoState } from '../TodoContext'
+...
+const todos = useTodoState();
+...
+```
 
 
 ## 3-3. 기능 구현하기
