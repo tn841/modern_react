@@ -470,3 +470,9 @@ const DialogBlock = styled.div`
 - 추가적으로, !visible 조건에서 null 를 반환하는 대신에 !animate && !localVisible 조건에서 null 을 반환하도록 수정한다.
 - DarkBackground 와 DialogBlock 에 disappear 라는 props 를 주어서 사라지는 효과가 나타나도록 설정
 ![](https://i.imgur.com/qgKmhsH.gif)
+
+
+
+## 2-4. 정리
+리액트 컴포넌트를 스타일링 할 수 있는 도구는 다양하다.
+다양한 라이브러리들을 사용해보고 취향에 맞는 라이브러리를 사용하면 된다.

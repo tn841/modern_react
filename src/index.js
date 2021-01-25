@@ -3,12 +3,13 @@ import ReactDOM from 'react-dom';
 import './index.css';
 // import App from './App';
 // import AppSass from './AppSass'
-import AppStyled from './AppStyled'
+// import AppStyled from './AppStyled'
+import AppTodo from './AppTodo'
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <AppStyled />
+    <AppTodo />
   </React.StrictMode>,
   document.getElementById('root')
 );
