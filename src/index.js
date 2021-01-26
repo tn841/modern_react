@@ -4,12 +4,13 @@ import './index.css';
 // import App from './App';
 // import AppSass from './AppSass'
 // import AppStyled from './AppStyled'
-import AppTodo from './AppTodo'
+// import AppTodo from './AppTodo'
+import Users from './Users'
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <AppTodo />
+    <Users />
   </React.StrictMode>,
   document.getElementById('root')
 );
