@@ -26,20 +26,22 @@ const TodoHeadBlock = styled.div`
       }
 `;
 
-const countTodo = (todos) => {
-    return todos.filter(todo => !todo.done).length
-}
-
 function TodoHead() {
     const todos = useTodoState();
-    const date = new Date().toDateString()
+    const today = new Date();
+    const date = today.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day:'numeric'
+    })
+    const dayName = today.toLocaleDateString('ko-KR', {weekday: 'long'})
 
-    const count = countTodo(todos)   
+    const count = todos.filter(todo => !todo.done).length   
 
     return (
         <TodoHeadBlock>
             <h1>{date}</h1>
-            <div className='day'>월요일</div>
+            <div className='day'>{dayName}</div>
             <div className='tasks-left'>할 일 {count}개 남음</div>
         </TodoHeadBlock>        
     )

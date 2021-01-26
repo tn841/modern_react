@@ -4,7 +4,7 @@ TodoList App을 만드는 과정에서 지금까지 배운 다양한 개념들�
 2. Context API를 사용한 전역 상태관리
 3. 배열 상태 다루기
 
-![완성된 TodoList 미리보기]()
+![완성된 TodoList 미리보기](https://i.imgur.com/lfzbcSi.gif)
 
 
 ## 3-1. 컴포넌트 만들기
@@ -56,6 +56,7 @@ App 컴포넌트에서 todos, onRemove, onToggle ... 상태과 함수들을 가�
 과 같은 문제가 발생한다.
 
 따라서, Context API를 활용하여 상태 또는 함수 관리를 깔끔하게 할 수 있다.
+
 ![](https://i.imgur.com/lYiiIZF.png)
 
 ### 리듀서 만들기
@@ -149,3 +150,45 @@ const todos = useTodoState();
 
 
 ## 3-3. 기능 구현하기
+이전 강의에서 구현한 Todo Components들과 Context API 값들을 이용하여 TodoList App을 완성해보자.
+
+### TodoHead 완성하기
+- todos state배열에서 todo.done 값이 false인 요소의 갯수 보여주기
+```js
+const count = todos.filter( todo => !todo.done ).length
+```
+- 날짜 보여주기
+  - Date클래스의 toLocaleString() 함수 사용
+  ```js
+  const today = new Date();
+    const date = today.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day:'numeric'
+    })
+    const dayName = today.toLocaleDateString('ko-KR', {weekday: 'long'})
+  ```
+### TodoList 완성하기
+- todos state를 Context API로부터 조회
+- 조회한 todos 배열을 TodoItem 컴포넌트로 map()
+```js
+function TodoList() {
+  const todos = useTodoState();
+  
+  return <TodoListBlock>
+    {todos && todos.map( todo => <TodoItem key={todo.id} todo={todo}/>)}
+  </TodoListBlock>;
+}
+```
+
+### TodoItem 완성하기
+- dispatch를 사용하여 Toggle과 Remove기능 구현
+- TodoItem export 코드에 React.memo()를 사용
+  - React.memo를 사용하면 다른 항목이 업데이트 될 때 불필요한 리랜더링을 방지 할 수 있다.
+
+
+### TodoCreate 완성하기
+- 컴포넌트 자체적으로 input 상태관리가 필요하다. (useState)
+- dispatch와 nextId값을 context로부터 가져온다.
+- React.memo로 컴포넌트를 감싸준다.
+  - state가 바뀔 때 TodoCreate 컴포넌트의 불필요한 리랜더링을 방지
