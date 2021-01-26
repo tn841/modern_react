@@ -199,3 +199,128 @@ function Users(){
 
 export default Users
 ```
+
+## 4-3. useAsync 커스텀 Hook 만들어 사용하기
+API 통신을 할 때 마다 리듀서를 작성하는 것은 번거롭다. 매번 반복되는 'LOADING', 'SUCCESS', 'ERROR' 코드를 커스텀 Hook로 만들어서 요청 상태 관리 로직을 쉽게 재사용가능하도록 구현한다.
+
+ ```js
+ import { useReducer, useEffect } from 'react';
+
+function reducer(state, action) {
+    switch (action.type) {
+      case 'LOADING':
+        return {
+          loading: true,
+          data: null,
+          error: null
+        };
+      case 'SUCCESS':
+        return {
+          loading: false,
+          data: action.data,
+          error: null
+        };
+      case 'ERROR':
+        return {
+          loading: false,
+          data: null,
+          error: action.error
+        };
+      default:
+        throw new Error(`Unhandled action type: ${action.type}`);
+    }
+  }
+
+  function useAsync(callback, deps = []) {
+    const [state, dispatch] = useReducer(reducer, {
+        loading: false,
+        data: null,
+        error: false
+      });
+
+      const fetchData = async () => {
+        dispatch({ type: 'LOADING' });
+        try {
+          const data = await callback();
+          dispatch({ type: 'SUCCESS', data });
+        } catch (e) {
+          dispatch({ type: 'ERROR', error: e });
+        }
+      };
+
+      useEffect(() => {
+        fetchData();
+        // eslint 설정을 다음 줄에서만 비활성화
+        // eslint-disable-next-line
+      }, deps);
+
+      return [state, fetchData];
+  }
+
+  export default useAsync;
+ ```
+
+ useAsync 함수는 두가지 파라미터를 받는다. 
+ 1. API요청을 시작하는 콜백 함수
+ 2. useEffect의 deps
+
+deps 값은 나중에 사용할 비동기 함수에서 파라미터가 필요하고, 그 파라미터가 바뀔 때 새로운 데이터를 불러오고 싶은 경우에 활용한다. default 값은 []이다, 즉 컴포넌트가 처음 랜더링 할 때만 API를 호출하고 싶다는 의미이다.
+
+useAsync Hook 함수의 리턴값은 [state, fetchData]이다. fetchData함수를 사용하여 API 요청을 쉽게 처리할 수 있다.
+
+
+### 데이터 나중에 불러오기
+User 컴포넌트는 처음 랜더링 되는 시점부터 API를 요청하고 있다. 특정 버튼을 눌렀을 때만 API요청을 하도록 구현해보자.
+
+useAsync 세번째 파라미터로 skip을 추가한다.
+```js
+ function useAsync(callback, deps = [], skip=false) {
+     ...
+     useEffect(() => {
+          if (skip) return;
+          fetchData();    
+    }
+    ...
+ }
+```
+
+
+### API 호출 시 파라미터가 필요한 경우
+User 한명의 상세정보를 보여주는 User 컴포넌트를 만들고, prop로 id를 넘겨 https://jsonplaceholder.typicode.com/users/1 와 같이 파라미터를 추가하여 API요청을 보낸다.
+
+```js
+import React from 'react';
+import axios from 'axios';
+import useAsync from './useAsync';
+
+async function getUser(id) {
+  const response = await axios.get(
+    `https://jsonplaceholder.typicode.com/users/${id}`
+  );
+  return response.data;
+}
+
+function User({ id }) {
+  const [state] = useAsync(() => getUser(id), [id]);
+  const { loading, data: user, error } = state;
+
+  if (loading) return <div>로딩중..</div>;
+  if (error) return <div>에러가 발생했습니다</div>;
+  if (!user) return null;
+
+  return (
+    <div>
+      <h2>{user.username}</h2>
+      <p>
+        <b>Email:</b> {user.email}
+      </p>
+    </div>
+  );
+}
+
+export default User;
+```
+
+id 가 바뀔 때 마다 재호출 되도록 deps 에 id 를 넣어준다.
+
+![](../img/api04.gif)
