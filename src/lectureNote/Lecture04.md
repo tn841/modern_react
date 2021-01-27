@@ -324,3 +324,76 @@ export default User;
 id 가 바뀔 때 마다 재호출 되도록 deps 에 id 를 넣어준다.
 
 ![](../img/api04.gif)
+
+
+## 4-4. react-async로 API 상태 관리하기
+[react-async](https://github.com/ghengeveld/react-async)는 지난 4-3에서 만들었던 useAsync와 비슷한 함수가 들어있는 라이브러리 이다.
+
+이 라이브러리에서 제공하는 함수의 이름도 useAsync인데, 사용법이 조금 다르다.
+
+매번 커스텀 Hook를 만들기 귀찮다면 react-async를 사용하면 된다. 우리가 만들었던 useAsync는 배열로 반환하는 반면, react-async의 useAsync는 객체 형태로 결과를 반환한다.
+
+우선 react-async 라이브러리를 설치한다.
+```bash
+npm install react-async
+```
+
+react-async의 공식 라이브러리에서 제공하는 사용법을 확인해보자.
+```js
+import { useAsync } from "react-async"
+
+const loadCustomer = async ({ customerId }, { signal }) => {
+  const res = await fetch(`/api/customers/${customerId}`, { signal })
+  if (!res.ok) throw new Error(res)
+  return res.json()
+}
+
+const MyComponent = () => {
+  const { data, error, isLoading } = useAsync({ 
+      promiseFn: loadCustomer, 
+      customerId: 1 
+    })
+  if (isLoading) return "Loading..."
+  if (error) return `Something went wrong: ${error.message}`
+  if (data)
+    return (
+      <div>
+        <strong>Loaded some data:</strong>
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      </div>
+    )
+  return null
+}
+```
+
+
+### User 컴포넌트 전환
+User 컴포넌트를 react-async의 useAsync로 변환해보자.
+
+```js
+// User.js
+const { data: user, error, isLoading } = useAsync({
+        promiseFn: getUser,
+        id,
+        watch: id
+    });
+```
+
+```js
+// Users.js
+const {data: users, isLoading, error, run, reload} = useAsync({
+        // promiseFn: fetchUsers
+        deferFn: fetchUsers
+    })
+```
+
+이전 섹션에서 배웠던 skip 처럼, 렌더링하는 시점이 아닌 사용자의 특정 인터랙션에 따라 API 를 호출하고 싶을 땐 promiseFn 대신 deferFn 을 사용하고, reload 대신 run 함수를 사용하면 된다.
+
+### 정리
+react-async 라이브러리는 정말 쓸만하고, 편합니다. 다만, 우리가 이전에 직접 만들었던 useAsync 와 크게 다를 건 없죠. 어떤 측면에서는 우리가 직접 만든 Hook 이 편하기도 합니다. 예를 들어서 Hook 의 옵션이 굉장히 간단하죠. 그리고, watch 같은 것 대신에 deps 를 사용하기도 하고, 반환 값이 배열 형태이기 때문에 (리액트 자체 내장 Hook 과 사용성이 비슷하다는 측면에서) 더욱 Hook 스럽습니다.
+
+반면에 react-async 의 useAsync 는 옵션이 다양하고 (promiseFn, deferFn, watch, ...) 결과 값도 객체 안에 다양한 값이 들어있어서 (run, reload, ...) 헷갈릴 수 있는 단점이 있긴 하지만 다양한 기능이 이미 내장되어있고 (예를 들어서 요청을 [취소](https://github.com/ghengeveld/react-async#cancel) 할 수도 있습니다.) Hook 을 직접 만들 필요 없이 바로 불러와서 사용 할 수 있는 측면에서는 정말 편합니다.
+
+만약 우리가 직접 만들었던 useAsync 의 작동 방식을 완벽히 이해하셨다면 여러분의 필요에 따라 커스터마이징 해가면서 사용 할 수 있으니까 직접 만들어서 사용하는 것을 추천드립니다. 특히나, 연습용 프로젝트가 아니라, 오랫동안 유지보수 할 수도 있게 되는 프로젝트라면 더더욱 추천합니다.
+
+반면, 작은 프로젝트이거나, 직접 만든 useAsync 의 작동 방식이 조금 어렵게 느껴지신다면 라이브러리로 설치해서 사용하는것도 좋습니다.
