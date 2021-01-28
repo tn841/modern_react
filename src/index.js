@@ -5,12 +5,12 @@ import './index.css';
 // import AppSass from './AppSass'
 // import AppStyled from './AppStyled'
 // import AppTodo from './AppTodo'
-import Users from './Users'
+import AppUsers from './AppUsers'
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Users />
+    <AppUsers />
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -397,3 +397,60 @@ react-async 라이브러리는 정말 쓸만하고, 편합니다. 다만, 우리
 만약 우리가 직접 만들었던 useAsync 의 작동 방식을 완벽히 이해하셨다면 여러분의 필요에 따라 커스터마이징 해가면서 사용 할 수 있으니까 직접 만들어서 사용하는 것을 추천드립니다. 특히나, 연습용 프로젝트가 아니라, 오랫동안 유지보수 할 수도 있게 되는 프로젝트라면 더더욱 추천합니다.
 
 반면, 작은 프로젝트이거나, 직접 만든 useAsync 의 작동 방식이 조금 어렵게 느껴지신다면 라이브러리로 설치해서 사용하는것도 좋습니다.
+
+## 4-5. Context와 함께 사용하기
+리액트의 Context와 API연동을 함께처리하는 방법에 대해서 알아본다. 앱 전체에서 사용되는 로그인 정보, 설정 정보는 API로 데이터를 가져온 뒤 Context로 관리한다.
+
+### Context 준비하기
+- UsersContext.js 파일 생성
+  - createContext, useReducer, useContext 사용
+  - initialState 정의
+  - reducer 함수 정의
+  - UserStateContext 생성, UserDispatchContext 생성
+  - UsersProvider 컴포넌트 정의
+    - props로 {children} 받아 return 하기
+    - useReducer로 [state, dispatch] 생성
+    - <Context.Provider value={}>로 context 값 넘겨주기
+  - state와 dispatch context값을 쉽게 사용할 수 있도록 커스텀 Hook 정의 및 export
+    - export function useUsersState()
+    - export function useUsersDispatch()
+
+
+### API 처리 비동기 함수 만들기
+위에서 준비된 UsersContext.js context 소스코드에 API처리 함수를 추가해준다. Context와는 독립적인 로직이며, Context의 dispatch를 사용하여 API의 응답값을 state에 넣어주는 API 처리함수 (getUsers, getUser)를 만든다.
+- axios 라이브러리 추가
+- getUsers 비동기 함수 정의
+```js
+export async function getUsers(dispatch){
+  dispatch({type:'GET_USERS'})
+  try{
+    const res = await axios.get('https://jsonplaceholder.typicode.com/users')
+    dispatch({type:'GET_USERS_SUCCESS', data:res.data})
+  } catch (e) {
+    dispatch({type:'GET_USERS_ERROR', error:e})
+  }
+}
+```
+- getUser 함수 정의
+```js
+export async function getUser(dispatch, id){
+  dispatch({ type: 'GET_USER' });
+  try {
+    const response = await axios.get(
+      `https://jsonplaceholder.typicode.com/users/${id}`
+    );
+    dispatch({ type: 'GET_USER_SUCCESS', data: response.data });
+  } catch (e) {
+    dispatch({ type: 'GET_USER_ERROR', error: e });
+  }
+}
+```
+
+getUsers()와 getUser() 함수 구조를 보면 중복되는 코드들이 있다. 이것들은 나중에 리팩토링해줄 예정이다.
+
+
+### Context 사용하기
+- AppUsers컴포넌트를 UsersProvider(Context)컴포넌트로 감싸준다.
+- Users컴포넌트에서 Context 값, 함수들을 사용한다.
+- User컴포넌트에서도 Context 값, 함수들을 사용한다.
+

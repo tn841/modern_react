@@ -1,25 +1,29 @@
-import React, { useEffect, useReducer, useState } from 'react'
-import axios from 'axios'
+import React, { useState } from 'react'
 // import useAsync from './useAsync'
-import { useAsync } from 'react-async'
+// import { useAsync } from 'react-async'
 import User from './User'
+import {useUsersState, useUsersDispatch, getUsers} from './UsersContext'
 
-const fetchUsers = async () => {
-    const res = await axios('https://jsonplaceholder.typicode.com/users')
-    return res.data
-}
+
 
 function Users(){
-    const {data: users, isLoading, error, run, reload} = useAsync({
-        // promiseFn: fetchUsers
-        deferFn: fetchUsers
-    })
+    // const {data: users, isLoading, error, run, reload} = useAsync({
+    //     // promiseFn: fetchUsers
+    //     deferFn: fetchUsers
+    // })
+    const state = useUsersState()
+    const dispatch = useUsersDispatch()
     const [userid, setUserid] = useState(null);
 
+    const {loading, data: users, error} = state.users;
 
-    if(isLoading) return <div>로딩중...</div>;
+    const fetchUsers = async () => {
+        getUsers(dispatch)
+    }
+
+    if(loading) return <div>로딩중...</div>;
     if(error) return <div>에러 발생</div>;
-    if(!users) return <button onClick={run}>데이터 불러오기</button>;
+    if(!users) return <button onClick={fetchUsers}>데이터 불러오기</button>;
 
     return (
         <>
@@ -36,7 +40,7 @@ function Users(){
                     </li>
                 ))}
             </ul>
-            <button onClick={run}>다시 불러오기</button>
+            <button onClick={fetchUsers}>다시 불러오기</button>
             <hr/>
             {userid && <User id={userid} />}
         </>
