@@ -135,3 +135,98 @@ function AppRouter(){
 
 ![](../img/router01.gif)
 
+
+## 5-2. 파라미터와 쿼리
+페이지 주소를 정의 할 때, 값을 전달하는 경우 파라미터와 쿼리 형태로 나타낼 수 있다.
+- 파라미터 : /profiles/tn841
+- 쿼리 : /about?detail=true
+
+정해진 규칙은 없으나, 일반적으로 파라미터는 특정 ID나 이름을 가지고 조회할 때 사용하고, 쿼리는 키워드를 검색하거나 옵션을 지정할 때 사용한다.
+
+### URL Params
+Profile 페이지에서 파라미터를 사용해보자.
+```js
+// /src/Profile.js
+import React from 'react';
+
+// 프로필에서 사용 할 데이터
+const profileData = {
+  sumin: {
+    name: '김수민',
+    description: 'react를 공부하는 개발자'
+  },
+  gildong: {
+    name: '홍길동',
+    description: '전래동화의 주인공'
+  }
+};
+
+const Profile = ({ match }) => {
+  // 파라미터를 받아올 땐 match 안에 들어있는 params 값을 참조합니다.
+  const { username } = match.params;
+  const profile = profileData[username];
+  if (!profile) {
+    return <div>존재하지 않는 유저입니다.</div>;
+  }
+  return (
+    <div>
+      <h3>
+        {username}({profile.name})
+      </h3>
+      <p>{profile.description}</p>
+    </div>
+  );
+};
+
+export default Profile;
+```
+파라미터를 받아올 땐 props.match.params 값을 참조한다. match객체 안에는 현재의 주소가 Route컴포넌트에서 정한 규칙과 어떻게 일치하는지에 대한 정보가 들어 있다.
+
+Profile 컴포넌트를 AppRouter에 적용해본다. path='/profile/:username' 이렇게 적용하면 username에 해당하는 값을 파라미터로 넣어주어 Profile 컴포넌트에서 props.match.params로 전달 받을 수 있다.
+
+![](../img/router02.gif)
+
+
+### Query
+About페이지에서 쿼리를 받아와보자. 쿼리는 Route컴포넌트에게 props로 전달되는 location객체에 있는 search값에서 읽어올 수 있다. location객체는 현재 앱이 갖고 있는 주소에 대한 정보를 가지고 있다.
+
+```js
+{
+  key: 'ac3df4', // not with HashHistory!
+  pathname: '/somewhere'
+  search: '?some=search-string',
+  hash: '#howdy',
+  state: {
+    [userDefined]: true
+  }
+}
+```
+location 객체에서 search 값을 확인해야한다. serach값은 문자열로 되어 있는데, 문자열을 쿼리스트링으로 바꾸어주는 [qs](https://www.npmjs.com/package/qs)라이브러리를 이용하여 쉽게 사용가능하다.
+
+About 컴포넌트에서 location.serach에 있는 데이터를 받아와서 ture일 때 추가 정보를 보여주도록 구현 해보자.
+
+```js
+import React from 'react';
+import qs from 'qs'
+
+const About = ({location}) => {
+    console.log(location)
+  const query = qs.parse(location.search, {
+    ignoreQueryPrefix: true
+  })
+
+
+  const detail = query.detail === 'true' // 파싱결과는 문자열이다.
+
+  return (
+    <div>
+      <h1>소개</h1>
+      <p>이 프로젝트는 리액트 라우터 기초를 실습해보는 예제 프로젝트랍니다.</p>
+      {detail && <p>추가정보를 표시합니다.</p>}
+    </div>
+  );
+};
+
+export default About;
+```
+![](../img/router03.gif)
