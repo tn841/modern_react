@@ -275,3 +275,85 @@ Route컴포넌트에서 component 속성 대신 render 속성을 사용하여 JS
 ![](../img/router04.gif)
 
 특정 라우트 내에 탭 같은것을 만들게될 경우, state로 관리하는 것 보다 서브라우로 관리하는 것을 권장한다. setState로 상태관리를 할 필요가 없고, 링크를 통해 다른 컴포넌트로 쉽게 진입할 수 있으며, 검색엔진 크롤링도 가능하기 때문이다.
+
+
+## 5-4. 리액트 라우터 부가기능
+
+### history 객체
+[history](https://reacttraining.com/react-router/web/api/history)객체는 Route 컴포넌트에게 match, loaction과 함께 전달되는 props중 하나이다. history객체를 통해 컴포넌트에서 Router에 직접 접근을 할 수 있다. 이를 통해 뒤로가기, 특정 경로이동, 이탈 방지 등을 구현한다.
+
+```js
+// /src/HistorySample.js
+
+import React, {useEffect} from 'react'
+
+function HistorySample({history}) {
+
+    const goHome = () => {
+        history.push('/')
+    }
+    const goBack = () => {
+        history.goBack();
+    }
+
+    useEffect(() => {
+        console.log(history)
+        const unblock = history.block('정말 떠나실건가요?')
+        return () => {
+            unblock()
+        }
+    }, [history])
+
+    return (
+        <div>
+            <button onClick={goHome}>홈으로</button>
+            <button onClick={goBack}>뒤로가기</button>
+        </div>
+    )
+}
+
+export default HistorySample
+```
+
+![](../img/router05.gif)
+
+
+### withRouter HoC
+withRouter Hoc는 Route 컴포넌트가 아닌 컴포넌트에서 match / location / history 를 사용해야할 때 쓴다.
+
+```js
+// /src/WithRouterSample.js
+
+import React from 'react'
+import { withRouter } from 'react-router-dom'
+
+const WithRouterSample = ({match, location, history}) => {
+    return (
+        <div>
+            <h4>location</h4>
+            <textarea 
+                value={JSON.stringify(location, null, 2)} 
+                readOnly
+                cols='40'
+                rows='7'
+            />
+            <h4>match</h4>
+            <textarea 
+                value={JSON.stringify(match, null, 2)} 
+                readOnly 
+                cols='40'
+                rows='7'
+            />
+            <br/>
+            <button onClick={() => history.push('/')}>홈으로</button>
+        </div>
+    )
+}
+
+export default withRouter(WithRouterSample);
+```
+
+withRouter를 사용하면 자신의 부모 컴포넌트의 match값이 전달된다. WidthRouterSample 컴포넌트의 match.params 값을 보면 {} 이렇게 비어있다. 그러나 URL파라미터를 보면 /profiles/sumin과 같이 'sumin'파라미터 지정되어 있다. 부모 컴포넌트(Profiles)의 match값이 전달되었기 때문이다.
+
+![](../img/router06.gif)
+
