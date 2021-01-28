@@ -230,3 +230,48 @@ const About = ({location}) => {
 export default About;
 ```
 ![](../img/router03.gif)
+
+
+## 5-3. 서브라우트
+서브라우트란 라우트 내부에 라우트를 만드는 것을 말한다. Route 컴포넌트 안에 Route컴포넌트를 랜더링하면된다.
+
+### 서브라우트 만들어보기
+Profiles라는 컴포넌트를 만들어서, 그 안에 각 유저들의 프로필 링크들과 프로필 라우트를 함께 랜더링 해보자.
+
+```js
+// /src/Profiles.js
+
+import React from 'react'
+import {Link, Route} from 'react-router-dom'
+
+function Profiles(){
+    return (
+        <div>
+            <h3>유저 목록:</h3>
+            <ul>
+                <li>
+                <Link to="/profiles/sumin">sumin</Link>
+                </li>
+                <li>
+                <Link to="/profiles/gildong">gildong</Link>
+                </li>
+            </ul>
+
+            <Route
+                path="/profiles"
+                exact
+                render={() => <div>유저를 선택해주세요.</div>}
+            />
+            <Route path="/profiles/:username" component={Profile} />
+        </div>
+    )
+}
+
+export default Profiles;
+```
+
+Route컴포넌트에서 component 속성 대신 render 속성을 사용하여 JSX를 바로 랜더링 할 수 있다.
+
+![](../img/router04.gif)
+
+특정 라우트 내에 탭 같은것을 만들게될 경우, state로 관리하는 것 보다 서브라우로 관리하는 것을 권장한다. setState로 상태관리를 할 필요가 없고, 링크를 통해 다른 컴포넌트로 쉽게 진입할 수 있으며, 검색엔진 크롤링도 가능하기 때문이다.
