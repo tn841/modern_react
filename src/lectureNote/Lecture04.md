@@ -454,3 +454,139 @@ getUsers()와 getUser() 함수 구조를 보면 중복되는 코드들이 있다
 - Users컴포넌트에서 Context 값, 함수들을 사용한다.
 - User컴포넌트에서도 Context 값, 함수들을 사용한다.
 
+
+### 반복되는 코드를 줄이자.
+위에서 구현한 코드는 Context + 비동기API 연동의 정석이다. 이 패턴을 잘 이해하고 활용하길 바란다. 나아가 반복되는 로직을 함수화 하여 리팩토링하는 작업을 진행한다.
+
+가장먼저 실제 API요청을 보내는 getUsers()와 getUser()함수의 axios로직(비동기 로직)만 api.js 파일로 분리해준다.
+```js
+// api.js
+
+import axios from 'axios';
+
+export async function getUsers() {
+  const response = await axios.get(
+    'https://jsonplaceholder.typicode.com/users'
+  );
+  return response.data;
+}
+
+export async function getUser(id) {
+  const response = await axios.get(
+    `https://jsonplaceholder.typicode.com/users/${id}`
+  );
+  return response.data;
+}
+```
+
+그리고 asyncActionUtils.js 라는 파일을 만든다.
+```js
+// asyncActionUtils.js
+
+export default function createAsyncDispatcher(type, promisFn) {
+  // 이 함수는 파라미터로 action.type과 Promise를 만들어주는 함수를 받아온다.
+  const SUCCESS = `${type}_SUCCESS`;
+  const ERROR = `${type}_ERROR`
+
+  async function actionHandler(dispatch, ...rest) {
+    dispatch({type});
+    try{
+      const data = await promiseFn(...rest);
+      dispatch({
+        type: SUCCESS,
+        data
+      })
+    } catch (e) {
+      dispatch({
+        type: ERROR,
+        error: e
+      })
+    }
+  }
+
+  return actionHandler;
+}
+```
+
+이제 UsersContext 코드를 다음과 같이 리팩토링할 수 있다.
+```js
+import React, { createContext, useReducer, useContext } from 'react';
+import createAsyncDispatcher from './createAsyncDispatcher';
+import * as api from './api'; // api 파일에서 내보낸 모든 함수들을 불러옴
+
+(...)
+
+export const getUsers = createAsyncDispatcher('GET_USERS', api.getUsers);
+export const getUser = createAsyncDispatcher('GET_USER', api.getUser);
+```
+
+
+나아가 UserContext의 리듀서 코드도 asyncActionUtils.js에 리팩토링할 수 있다.
+
+```js
+// asyncActionUtils.js
+...
+export const initialAsyncState = {
+  loading: false,
+  data: null,
+  error: null
+};
+
+// 로딩중일 때 바뀔 상태 객체
+const loadingState = {
+  loading: true,
+  data: null,
+  error: null
+};
+
+// 성공했을 때의 상태 만들어주는 함수
+const success = data => ({
+  loading: false,
+  data,
+  error: null
+});
+
+// 실패했을 때의 상태 만들어주는 함수
+const error = error => ({
+  loading: false,
+  data: null,
+  error: error
+});
+
+// 세가지 액션을 처리하는 리듀서를 만들어줍니다
+// type 은 액션 타입, key 는 리듀서서 사용할 필드 이름입니다 (예: user, users)
+export function createAsyncHandler(type, key) {
+  // 성공, 실패에 대한 액션 타입 문자열을 준비합니다.
+  const SUCCESS = `${type}_SUCCESS`;
+  const ERROR = `${type}_ERROR`;
+
+  // 함수를 새로 만들어서
+  function handler(state, action) {
+    switch (action.type) {
+      case type:
+        return {
+          ...state,
+          [key]: loadingState
+        };
+      case SUCCESS:
+        return {
+          ...state,
+          [key]: success(action.data)
+        };
+      case ERROR:
+        return {
+          ...state,
+          [key]: error(action.error)
+        };
+      default:
+        return state;
+    }
+  }
+
+  // 반환합니다
+  return handler;
+}
+```
+
+
+반복되는 코드가 많이 사라졌지요? 꼭 이렇게 까지 리팩토링을 할 필요가 없지만, 이런 코드가 맘에 든다면, 자주 사용되는 코드를 함수화해서 재사용하시면 좋습니다.
