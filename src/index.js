@@ -1,17 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom'
 import './index.css';
 // import App from './App';
 // import AppSass from './AppSass'
 // import AppStyled from './AppStyled'
 // import AppTodo from './AppTodo'
-import AppUsers from './AppUsers'
+// import AppUsers from './AppUsers'
+import AppRouter from './AppRouter'
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <AppUsers />
-  </React.StrictMode>,
+  <BrowserRouter>
+    <AppRouter />
+  </BrowserRouter>,
   document.getElementById('root')
 );
 
