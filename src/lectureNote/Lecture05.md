@@ -357,3 +357,97 @@ withRouter를 사용하면 자신의 부모 컴포넌트의 match값이 전달�
 
 ![](../img/router06.gif)
 
+### Switch
+Switch는 여러 Router컴포넌트들을 감싸서 그 중 규칙이 일치하는 Route 하나만을 랜더링 시켜준다. 아무것도 일치하지 않을 경우 보여줄 Not Found 페이지를 구현할 수 있다.
+
+```js
+// /src/AppRouter.js
+
+...
+<Switch>
+  <Route path="/" exact={true} component={Home} />
+  <Route path="/about" component={About} />
+  <Route path="/profiles" component={Profiles} />
+  <Route path="/history" component={HistorySample} />
+  <Route
+    // path 를 따로 정의하지 않으면 모든 상황에 렌더링됨
+    render={({ location }) => (
+      <div>
+        <h2>이 페이지는 존재하지 않습니다:</h2>
+        <p>{location.pathname}</p>
+      </div>
+    )}
+  />
+</Switch>
+...
+```
+
+
+### NavLink
+Link컴포넌트와 비슷하다. 현재 URL과 Link에서 사용하는 경로가 일치하는 경우 특정 스타일 혹은 클래스를 적용할 수 있는 컴포넌트이다.
+
+Profilies 컴포넌트에서 Link대신 NavLink를 사용해보자.
+```js
+// /src/Profiles.js
+
+<NavLink 
+    to="/profiles/sumin"
+    activeStyle={{ background: 'green', color: 'white'}}
+    // activeClassName 도 가능하다.
+>sumin</NavLink>
+```
+
+
+### 기타
+- [Redirect](https://reacttraining.com/react-router/web/example/auth-workflow): 페이지를 리디렉트 하는 컴포넌트
+- [Prompt]](https://reacttraining.com/react-router/web/example/preventing-transitions): history.block의 컴포넌트 버전
+- [Route Config](https://reacttraining.com/react-router/web/example/route-config): JSX형태로 Route를 선언하는 것이 아닌, 배열/객체를 사용하여 Route정의하기
+- [Memory Router](https://reacttraining.com/react-router/web/api/MemoryRouter): 실제로 주소는 존재하지 않는 라우터. 리액트 네이티브나 임베디드 웹앱에서 사용하면 유용하다.
+
+그외에 [공식 매뉴얼]](https://reacttraining.com/react-router/web/guides/philosophy)을 참고
+
+
+## 5-5. useReactRouter Hook 사용하기
+5-4. 섹션에서 withRouter라는 함수를 사용해서 Route 컴포넌트가 아닌 컴포넌트에서도 Route관련 props인 match, history, location을 사용하는 방법을 배웠다.
+
+withRouter를 사용하는 대신, Hook를 사용해서 구현가능하다.
+
+> 강의내용이 react-router-dom의 최신내용이 아니라, Hook관련 내용은 react-router-dom 공식문서 내용을 정리한다. [링크](https://reactrouter.com/web/api/Hooks)
+
+### useHistory, useLocation, useParams, useRouteMatch
+```js
+import React from 'react'
+import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom'
+
+const WithRouterSample = () => {
+    let history = useHistory();
+    let location = useLocation();
+    let params = useParams()    
+    let match = useRouteMatch()
+
+    console.log(params)
+
+    return (
+        <div>
+            <h4>location </h4>
+            <textarea 
+                value={JSON.stringify(location, null, 2)} 
+                readOnly
+                cols='40'
+                rows='7'
+            />
+            <h4>match </h4>
+            <textarea 
+                value={JSON.stringify(match, null, 2)} 
+                readOnly 
+                cols='40'
+                rows='7'
+            />
+            <br/>
+            <button onClick={() => history.push('/')}>홈으로</button>
+        </div>
+    )
+}
+
+export default WithRouterSample;
+```
