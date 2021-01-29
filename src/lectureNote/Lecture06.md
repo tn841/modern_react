@@ -245,3 +245,50 @@ store.dispatch(decrease())
 store.dispatch(changeText('안녕하세요.'))
 store.dispatch(addToList({id: 1, text: 'gksk'}))
 ```
+
+
+## 6-4. 리덕스 모듈 만들기
+리덕스 모듈이란 다음 항목들이 모두 들어가 있는 JS파일을 말한다.
+- 액션 타입
+- 액션 생성함수
+- 리듀서
+
+리덕스를 사용하기 위해 위 항목들을 각각 다른 파일에 생성할 수 도 있다. 리덕스의 공식 GITHub에 올라간 [예제프로젝트](https://github.com/reduxjs/redux/tree/master/examples/todos/src)를 보면 다음과 같이 action과 reducer가 분리되어 있다.
+
+- actions
+    - index.js
+- reducers
+    - todos.js
+    - visibilityFilter.js
+    - index.js
+
+위 예제 프로젝트에서는 action과 reducer가 서로 다른 파일에 정의되어 있다. 하지만 꼭 action과 reducer가 분리되어 있을 필요는 없다. 오히려 이렇게 분리되어있으면 개발할 때 불편하다. 그래서 우리는 action과 reducer를 하나의 파일에 몰아서 작성할 것이다. 이런 패턴을 [Ducks 패턴](https://github.com/erikras/ducks-modular-redux)이라고 부른다. 
+
+### counter redux 모듈 만들기
+- action 타입 만들기
+- action creator 함수 만들기
+- initialState 선언
+- reducer 함수 정의
+
+
+### todos redux 모듈 만들기
+
+
+### root reducer 만들기
+현재 두개의 redux 모듈을 만들었다. 두개의 리듀서를 하나로 합쳐서 사용해야한다. 합쳐진 리듀서를 루트 리듀서라고 부른다.
+
+리덕스의 ```combineReducers()``` 함수를 사용한다.
+
+
+
+
+### 리액트 프로젝트에 리덕스 적용하기
+리액트 프로젝트에 리덕스를 적용하려면 react-redux라는 라이브러리를 사용해야한다.
+```bash
+npm install react-redux
+```
+
+- react-redux 라이브러리 설치
+- index.js에서 redux에서 제공하는 Provider컴포넌트를 불러오기
+- AppRedux컴포넌트를 Provider컴포넌트로 감싸기
+- Provider컴포넌트의 props로 store 전달하기
