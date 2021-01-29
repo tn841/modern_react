@@ -1,19 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom'
+// import { BrowserRouter } from 'react-router-dom'
 import './index.css';
 // import App from './App';
 // import AppSass from './AppSass'
 // import AppStyled from './AppStyled'
 // import AppTodo from './AppTodo'
 // import AppUsers from './AppUsers'
-import AppRouter from './AppRouter'
+// import AppRouter from './AppRouter'
+import AppRedux from './AppRedux'
 import reportWebVitals from './reportWebVitals';
+import './reduxExercise'
 
 ReactDOM.render(
-  <BrowserRouter>
-    <AppRouter />
-  </BrowserRouter>,
+  <AppRedux />,
   document.getElementById('root')
 );
 

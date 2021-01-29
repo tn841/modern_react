@@ -146,3 +146,102 @@ subscribe 또한 redux store의 내장 함수 중 하나이다. subscribe 함수
 - **똑같은 파라미터로 호출된 리듀서 함수는 언제나 똑같은 결과를 반환해야한다.**
 
 new Date()를 사용한다던지, 랜덤 숫자를 생성한다던지, API요청으로 데이터를 받는 작업은 똑같은 결과를 반환하지 않기 때문에 리듀서 함수 바깥에서 처리해줘야한다. 그런 작업을 처리하기위해서 [리덕스 미들웨어](https://velopert.com/3401)를 사용한다.
+
+
+
+## 6-3. 리덕스 사용 준비
+리액트에서 리덕스를 사용하기에 앞서, 리액트 컴포넌트 없이 리덕스에서 제공하는 기능을 먼저 살펴본다.
+
+```bash
+npm install redux
+```
+
+reduxExercise.js 파일을 생성하고 redux를 불러와서 redux의 다양한 내장 API를 사용해보는 연습을 진행한다.
+
+```js
+import {createStore} from 'redux'
+console.log("Hello");
+
+// 리덕스에서 관리할 state정의
+const initialState = {
+    counter: 0,
+    text: '',
+    list: []
+}
+
+// 액션 타입 정의
+const INCREASE = 'INCREASE';
+const DECREASE = 'DECREASE';
+const CHANGE_TEXT = 'CHANGE_TEXT';
+const ADD_TO_LIST = 'ADD_TO_LIST';
+
+// 액션 생성 함수 정의
+function increase() {
+    return {
+        type: INCREASE
+    }
+}
+
+const decrease = () => ({
+    type: DECREASE
+})
+
+const changeText = (text) => ({
+    type: CHANGE_TEXT,
+    text
+})
+
+const addToList = item => ({
+    type: ADD_TO_LIST,
+    item
+})
+
+// 리듀서 만들기
+function reducer(state=initialState, action) {
+    switch(action.type){
+        case INCREASE:
+            return {
+                ...state,
+                counter: state.counter + 1
+            };
+        case DECREASE:
+            return {
+                ...state,
+                counter: state.counter -1
+            }
+        case CHANGE_TEXT:
+            return {
+                ...state,
+                text: action.text
+            }
+        case ADD_TO_LIST:
+            return {
+                ...state,
+                list: state.list.concat(action.item)
+            }
+        default:
+            return state
+    }
+}
+
+// 스토어 생성하기
+const store = createStore(reducer)
+console.log(store.getState())   // 스토어 내부의 상태 조회
+
+// state가 바뀔 때 마다 호출되는 liistener 함수
+const listener = () => {
+    const state = store.getState();
+    console.log(state)
+}
+
+// 구독을 해제하고 싶을 때는 unsubscribe()를 호출 한다.
+const unsubscribe = store.subscribe(listener)
+
+
+
+// 액션을 디스패치 해본다.
+store.dispatch(increase())
+store.dispatch(decrease())
+store.dispatch(changeText('안녕하세요.'))
+store.dispatch(addToList({id: 1, text: 'gksk'}))
+```
