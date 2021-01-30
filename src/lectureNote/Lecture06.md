@@ -292,3 +292,6 @@ npm install react-redux
 - index.js에서 redux에서 제공하는 Provider컴포넌트를 불러오기
 - AppRedux컴포넌트를 Provider컴포넌트로 감싸기
 - Provider컴포넌트의 props로 store 전달하기
+
+
+## 6-5. 카운터 구현하기
