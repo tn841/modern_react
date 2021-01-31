@@ -272,6 +272,10 @@ store.dispatch(addToList({id: 1, text: 'gksk'}))
 
 
 ### todos redux 모듈 만들기
+- action type 정의
+- action creator 만들기
+- initialState 선언
+- reducer 함수 정의
 
 
 ### root reducer 만들기
@@ -279,7 +283,37 @@ store.dispatch(addToList({id: 1, text: 'gksk'}))
 
 리덕스의 ```combineReducers()``` 함수를 사용한다.
 
+/modules 디렉터리 하위에 index.js를 만들고 combineReducer 함수로 root Reducer를 생성한다.
 
+```js
+// /src/modules/index.js
+
+import {combineReducers } from 'redux'
+import counter from './counter'
+import todos from './todos'
+
+const rootReducer = combineReducers ({
+    counter,
+    todos
+})
+
+export default rootReducer
+```
+
+이제 /src/index.js 파일에 redux store를 생성하고 redux를 적용한다.
+
+```js
+// /src/index.js
+...
+import {createStore} from 'redux'
+import rootReducer from './modules'
+
+const store = createStore(rootReducer)
+console.log(store.getState())
+...
+```
+console.log() 확인
+![](../img/redux01.PNG)
 
 
 ### 리액트 프로젝트에 리덕스 적용하기
@@ -293,5 +327,22 @@ npm install react-redux
 - AppRedux컴포넌트를 Provider컴포넌트로 감싸기
 - Provider컴포넌트의 props로 store 전달하기
 
+```js
+import {createStore} from 'redux'
+import { Provider } from 'react-redux';
+import rootReducer from './modules'
+
+const store = createStore(rootReducer)
+// console.log(store.getState())
+
+ReactDOM.render(
+  <Provider store={store}>
+    <AppRedux />
+  </Provider>  ,
+  document.getElementById('root')
+);
+```
+
+이렇게 Provider컴포넌트로 App을 감싸게 되면 우리가 랜더링하는 모든 컴포넌트에서 리덕스 스토어에 접근할 수 있게 된다.
 
 ## 6-5. 카운터 구현하기

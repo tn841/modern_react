@@ -11,8 +11,8 @@ export const increase = () => {
 export const decrease = () => {
     return {type:DECREASE}
 }
-export const setDiff = () => {
-    return  {type:SET_DIFF, data}
+export const setDiff = (diff) => {
+    return  {type:SET_DIFF, diff}
 }
 
 
@@ -35,6 +35,11 @@ export default function counter(state=initialState, action) {
             return {
                 ...state,
                 number: state.number - state.diff
+            }
+        case SET_DIFF:
+            return {
+                ...state,
+                diff: action.diff
             }
         default:
             return state

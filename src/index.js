@@ -10,10 +10,19 @@ import './index.css';
 // import AppRouter from './AppRouter'
 import AppRedux from './AppRedux'
 import reportWebVitals from './reportWebVitals';
-import './reduxExercise'
+// import './reduxExercise'
+
+import {createStore} from 'redux'
+import { Provider } from 'react-redux';
+import rootReducer from './modules'
+
+const store = createStore(rootReducer)
+// console.log(store.getState())
 
 ReactDOM.render(
-  <AppRedux />,
+  <Provider store={store}>
+    <AppRedux />
+  </Provider>  ,
   document.getElementById('root')
 );
 
