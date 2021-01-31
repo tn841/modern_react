@@ -346,3 +346,70 @@ ReactDOM.render(
 이렇게 Provider컴포넌트로 App을 감싸게 되면 우리가 랜더링하는 모든 컴포넌트에서 리덕스 스토어에 접근할 수 있게 된다.
 
 ## 6-5. 카운터 구현하기
+
+### 프리젠테이셔널 컴포넌트 만들기
+프리젠테이셔널 컴포넌트란, 리덕스 스토어에 접근하지 않고 필요한 값을 props로만 전달받아 사용하는 컴포넌트이다.
+
+src/todoComponents 디렉토리를 만들고, 그 안에 Counter.js를 생성하자.
+
+- props 목록 {{ number, diff, onIncrease, onDecrease, onSetDiff }}
+- +, - 버튼이 있으며 number 가 표시된다.
+- diff 값을 설정할 수 있는 &lt;input type="number" /&gt;가 있다.
+
+
+### 컨테이너 컴포넌트 만들기
+컨테이너 컴포넌트란, 리덕스 스토어에서 상태를 조회하거나, 액션을 디스패치 할 수 있는 컴포넌트를 말한다. HTML 태그를 사용하지 않고, 다른 프리젠테이셔널 컴포넌트를 불러와서 로직을 구현한다.
+
+src/todoContainers 디렉토리를 만들고, 그 안에 CounterContainer.js를 생성하자.
+
+- import { useSelector, useDispatch} from 'react-redux'
+- Counter.js 컴포넌트를 불러온다.
+- redux 모듈에서 action creator를 불러온다.
+
+#### [useSelector]
+: useSelector는 redux store에서 state를 조회하는 Hook이다. store.getState() 함수를 호출한 결과와 동일한다.
+
+#### [useDispatch]
+: redux store에서 dispatch함수를 리턴해주는 Hook이다.
+
+
+```js
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import Counter from '../todoComponents/Counter'
+import { increase, decrease, setDiff } from '../modules/counter'
+
+function CounterContainer(){
+    const {number, diff} = useSelector(state => ({
+        number: state.counter.number,
+        diff: state.counter.diff
+    }))
+
+    const dispatch = useDispatch();
+
+    const onIncrease = () => dispatch(increase())
+    const onDecrease = () => dispatch(decrease())
+    const onSetDiff = () => dispatch(setDiff(diff))
+
+    return (
+        <Counter
+            number={number}
+            diff={diff}
+            onIncrease={onIncrease}
+            onDecrease={onDecrease}
+            onSetDiff={onSetDiff}
+        />
+    )
+}
+
+export default CounterContainer
+```
+
+![](../img/redux02.gif)
+
+
+
+### 프리젠테이셔널 컴포넌트와 컨테이너 컴포넌트
+프리젠테이션널 컴포넌트와 컨테이너 컴포넌트를 분리하는 패턴은 리덕스의 창시자 Dan Abramov가 소개하였다. 하지만 꼭 이렇게 분리할 필요는 없다. 개발자 편할대로 하면 된다.
+
+강사는 개인적으로 프리젠테셔널 컴포넌트와 컨테이터 컴포넌트를 분리해서 작성하긴 하지만 디렉토리를 분리해서 작성하지는 않는다.

@@ -1,3 +1,9 @@
 import React from 'react'
-const AppRedux = () => (<h1>Hello Redux</h1>);
+import CounterContainer from './todoContainers/CounterContainer'
+
+const AppRedux = () => (
+    <div style={{margin: "10px"}}>
+        <CounterContainer />
+    </div>
+    );
 export default AppRedux
