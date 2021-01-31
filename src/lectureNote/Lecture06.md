@@ -413,3 +413,21 @@ export default CounterContainer
 프리젠테이션널 컴포넌트와 컨테이너 컴포넌트를 분리하는 패턴은 리덕스의 창시자 Dan Abramov가 소개하였다. 하지만 꼭 이렇게 분리할 필요는 없다. 개발자 편할대로 하면 된다.
 
 강사는 개인적으로 프리젠테셔널 컴포넌트와 컨테이터 컴포넌트를 분리해서 작성하긴 하지만 디렉토리를 분리해서 작성하지는 않는다.
+
+
+## 6-6. 리덕스 개발자도구 적용하기
+리덕스 개발자 도구를 사용하면 현재 redux store의 state를 chrome 개발자 도구에서 조회할 수 있고, 지금까지 dispatch된 action 히스토리를 확인할 수 있다. 직접 action을 dispatch할 수 도 있다.
+
+- chrome 웹 스토어에서 확장프로그램 설치 [링크](https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd)
+- 프로젝트에 라이브러리 설치 ```npm install redux-devtools-extenstion```
+- /src/index.js를 다음과 같이 수정
+```js
+...
+import { composeWithDevTools } from 'redux-devtools-extension'; // 리덕스 개발자 도구
+
+const store = createStore(rootReducer, composeWithDevTools()); // 스토어를 만듭니다.
+// composeWithDevTools 를 사용하여 리덕스 개발자 도구 활성화
+...
+```
+
+![](../img/redux03.gif)
