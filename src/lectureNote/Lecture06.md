@@ -431,3 +431,23 @@ const store = createStore(rootReducer, composeWithDevTools()); // 스토어를 �
 ```
 
 ![](../img/redux03.gif)
+
+
+## 6-7. 할 일 목록 구현하기
+
+#### Todos.js 프리젠테이셔널 컴포넌트 구현
+- 경로 : /src/todoComponents/Todo.js
+- TodoItem, TodoList, Todos 3가지 컴포넌트 작성 
+```js
+const TodoItem = React.memo(function TodoItem({ todo, onToggle }) {}
+
+const TodoList = React.memo(function TodoList({ todos, onToggle }) {}
+
+function Todos({ todos, onCreate, onToggle }) {}
+```
+
+#### TodosContainer.js 컨테이너 컴포넌트 구현
+- 경로 : /src/todoContainers/TodosContainer.js
+
+
+![](../img/redux04.gif)

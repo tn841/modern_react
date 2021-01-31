@@ -34,7 +34,8 @@ export default function todos(state=initialState, action) {
         case ADD_TODO:
             return state.concat(action.todo)
         case TOGGLE_TODO:
-            return state.map( todo => todo.id === action.id ? {...todo, done: !todo.done} : todo)
+            return state.map( todo => 
+                todo.id === action.id ? {...todo, done: !todo.done} : todo)
         default:
             return state
     }
