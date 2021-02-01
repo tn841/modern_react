@@ -451,3 +451,74 @@ function Todos({ todos, onCreate, onToggle }) {}
 
 
 ![](../img/redux04.gif)
+
+
+## 6-8. useSelector 최적화
+리액트 컴포넌트에서 리덕스 상태를 조할 때 최적화를 어떻게 하는지 알아본다.
+
+6-7. 에서 프리젠테이셔널 컴포넌트(Todo.js)에서 React.memo를 사용하여 리랜더링 최적화를 해줬다. 컨테이너 컴포넌트(TodosContainer.js)에서는 어떤 것들을 고려해야하는지 알아본다.
+
+우선 크롬 리액트 개발자도구에서 Highlight Updates를 활성화해서 어떤 컴포넌트들이 update되는지 확인 하자.
+
+Counter의 +, -를 누르면 Counter 컴포넌트만 Update되는 것을 확인할 수 있다. 그러나 Todo 컴포넌트를 Toggle해보면 Counter 컴포넌트도 Update되는 것을 확인할 수 있다.
+
+![](../imig/redux05.PNG)
+
+useSelector Hook를 사용해서 리덕스 스토어의 상태를 조회 할 땐, 상태가 바뀌지 않으면 리랜더링하지 않는다.
+
+
+TodosContainer의 경우 Counter 값이 바뀔 때 todos 값에는 변화가 없기 때문에 리랜더링 되지 않는다.
+
+```js
+const todos = useSelector(state => state.todos)
+```
+
+반면 CounterContainer의 경우 useSelector Hook을 통해 매번 랜더링 될 때마다 새로운 객체 { number, diff }를 만드는 것이기 때문에 state가 바뀌었는지 바뀌지 않았는지 확인이 불가능하다. 따라서 매번 리랜더링이 이루어지고 있다.
+
+```js
+const { number, diff } = useSelector(state => ({
+    number: state.counter.number,
+    diff: state.counter.diff
+}))
+```
+
+이를 최적화 하는 방법은 두가지가 있다.
+
+1. useSelector를 todos 처럼 사용하기
+
+```js
+const number = useSelector(state => state.counter.number)
+const diff = useSelector(state =>  state.counter.diff)
+```
+
+2. react-redux의 shallowEqual 함수를 useSelector 두번째 인자로 전달하기
+
+```js
+import {useSelector, useDispatch, shallowEqual} from 'react-redux'
+const {number, diff} = useSelector(state => ({
+    number: state.counter.number,
+    diff: state.counter.diff
+}), shallowEqual);
+```
+
+useSelector의 두번째 파라미터는 equalityFn이다. 
+```js
+equalityFn?(left: any, right: any) => boolean 
+```
+이전 값과 다음 값을 비교하여 true가 나오면 리랜더링을 하지 않고 false가 나오면 리랜더링을 한다. shallowEqual은 react-redux에 내장되어 있는 함수로, 객체 안의 가장 겉에 있는 값들을 비교해준다. 예를들어
+```js
+const object = {
+    a: {
+        x: 1,
+        y: 2,
+        z: 3
+    },
+    b: 1,
+    c: [
+        {id : 1}
+    ]
+}
+```
+위와 같은 객체가 있는 경우 가장 겉에 있는 값은 object.a, object.b, object.c 이다. shallowEqual에서는 a,b,c 만 비교한다.
+
+이렇게 컨테이너 컴포넌트를 최적화 할 수 있다.
