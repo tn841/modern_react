@@ -19,10 +19,11 @@ import rootReducer from './modules'
 import { composeWithDevTools } from 'redux-devtools-extension';
 // import myLogger from './middlewares/myLogger'
 import logger from 'redux-logger'
+import ReduxThunk from 'redux-thunk'
 
 const store = createStore(
   rootReducer, 
-  composeWithDevTools(applyMiddleware(logger)) 
+  composeWithDevTools(applyMiddleware(ReduxThunk, logger)) //logger는 가장 마지막에 와야한다.
 );
 // console.log(store.getState())
 

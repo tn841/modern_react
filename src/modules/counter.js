@@ -15,6 +15,13 @@ export const setDiff = (diff) => {
     return  {type:SET_DIFF, diff}
 }
 
+//thunk 만들기
+export const increaseAsync = () => (dispatch, getState) => {
+    setTimeout(() => {dispatch(increase())}, 1000)
+}
+export const decreaseAsync = () => (dispatch, getState) => {
+    setTimeout(() => {dispatch(decrease())}, 1000)
+}
 
 // initialState 선언
 export const initialState = {

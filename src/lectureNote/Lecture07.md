@@ -182,3 +182,76 @@ const store = createStore(reducer, composeWithDevTools(
   // other store enhancers if any
 ));
 ```
+
+
+
+## 7-4. redux-thunk
+redux-thunk는 리덕스에서 비동기 작업을 처리 할 때 가장 많이 사용하는 미들웨어이다. redux-thunk를 사용하면 **액션객체가 아닌 액션함수를 디스패치 할 수 있다.** redux-thunk는 redux 창시자인 DanAbramov가 만들었으며, 리덕스 공식 매뉴얼에서도 비동기 작업을 처리하기 위한 예시로 redux-thunk를 보여준다.
+
+7-2.장에서 직접 미들웨어를 만들어보면서 다음과 같은 예시 코드를 만들었다.
+```js
+const thunk => store => next => action => 
+    typeof action === 'function'
+        ? action(store.dispatch, store.getState())
+        : next(action)
+```
+실제로 redux-thunk 라이브러리의 [코드](https://github.com/reduxjs/redux-thunk/blob/master/src/index.js)는 위와 유사하다. 코드는 겨우 14줄에 불과하다. 이 라이브러리의 다운로드수는 140만대 이다.
+
+이 미들웨어를 사용하면 함수를 dispatch할 수 있다고 했는데, 함수를 디스패치할 때는, 해당 함수에서 dispatch와 getState()를 파라미터로 받아줘야한다. dispatch와 getState()를 파라미터로 받는 함수를 만들어주는 함수를 thunk라고 부른다.
+
+thunk의 예시는 다음과 같다.
+
+```js
+const getCommnets = () => {
+    return (dispatch, getstate) => {
+        const id = getstate().post.activeId
+
+        dispatch({type: 'GET_COMMENTS'})
+
+        api
+            .getComments(id)
+            .then(commnets => dispatch({type: 'GET_COMMENTS_SUCCESS', id, comments}))
+            .catch(e => dispatch(type: 'GET_COMMENTS_ERROR', error: e}))
+    }
+}
+```
+
+thunk 함수에서 synce/await를 사용할 수도 있다.
+
+```js
+const getComments = () => async (dispatch, getState) => {
+    const id = getState.post.activeId
+    dispatch({type: 'GET_COMMENTS'})
+    try{
+        const commnets = await api.getComments(id)
+        dispatch({type: 'GET_COMMENTS_SUCCESS', id, comments});
+    } catch (e) {
+        dispatch({type: 'GET_COMMENTS_ERROR', error: e})
+    }
+}
+```
+
+### redux-thunk 설치 및 적용하기
+
+redux-thunk를 설치하고 index.js에 적용한다.
+
+```js
+import logger from 'redux-logger'
+import ReduxThunk from 'redux-thunk'
+
+const store = createStore(
+  rootReducer, 
+  composeWithDevTools(applyMiddleware(ReduxThunk, logger)) //logger는 가장 마지막에 와야한다.
+);
+```
+
+### 카운터 딜레이 시키기
+아주 기본적인 비동기 작업부터 해보자. thunk함수를 만들고 setTimeout을 사용하여 action이 dispatch되는 것을 1초씩 딜레시켜본다.
+
+- /src/modules/counter.js 
+    - counter 모듈에서 1초 딜레이되는 thunk 함수를 정의
+- /src/todoContainers/CounterContainerWithMiddleware.js
+    - action 객체를 dispatch하는 소스를 thunk 함수를 dispatch 하는 것으로 변경
+
+
+![1초 딜레이 확인]()
