@@ -521,4 +521,106 @@ const object = {
 ```
 위와 같은 객체가 있는 경우 가장 겉에 있는 값은 object.a, object.b, object.c 이다. shallowEqual에서는 a,b,c 만 비교한다.
 
-이렇게 컨테이너 컴포넌트를 최적화 할 수 있다.
+이렇게 컨테이너 컴포넌트의 useSeletor를 최적화 할 수 있다.
+
+## 6-9. connect 함수
+connect 함수는 컨테이너 컴포넌트를 만드는 또 다른 방법이다. 사실 이 함수는 앞으로 사용할 일이 별로 없다. useSelector와 useDispatch가 훨씬 편하기 때문이다.
+
+모던 리액트 컴포넌트를 만들 때는 함수형 컴포넌트로 만드는 것이 우선시 되고, 피치 못할 경우에만 클래스형 컴포넌트로 작성해야한다. 클래스형 컴포넌트를 작성하게 될 경우에는, Hooks를 사용하지 못하기 때문에 connect 함수를 사용해야한다.
+
+이전에 connect함수로 작성된 컴포넌트들이 있을 수 있기 때문에 connect 함수에 대해서 알고는 있어야 한다.
+
+### HOC란?
+connect함수는 HOC이다. Higher-Order Component의 약자로, 리액트 컴포넌트를 재활용할 때 유용한 개발 패턴이다. 
+
+Hook가 HOC를 대체할 수 있기 때문에 HOC를 배우기위해 많은 시간을 투자할 필요는 없다.
+
+HOC란 "컴포넌트를 특정 함수로 감싸서 특정 값 또는 함수를 props로 받아와 사용할 수 있게 해주는 패턴"이라는 것을 알아 두면 된다.
+
+HOC 컬렌션 라이브러리인 [recompose](https://github.com/acdlite/recompose)를 보면 HOC를 통해 어떤 것을 할 수 있는지 확인할 수 있다.
+
+```js
+const enhance = widthState('counter', 'setCounter', 0)
+const Counter = enhance( ({counter, setCounter}) => (
+    <div>
+        Count :{counter}
+        <button onClick={ ()=> {setCounter(n => n+1)})}>+</button>
+    </div>))
+```
+
+useState와 비슷하다. widthState함수를 사용해서 enhance라는 컴포넌트를 만들 때, props로 counter와 setCounter를 받는 함수를 만들었다. 
+
+
+### connect 사용해보기
+connect 함수는 리덕스 스토어안에 있는 state를 props로 넣어줄 수도 있고, dispatch 함수를 props롤 넣어줄 수도 있다.
+
+```js
+// /src/todoContainers/CounterContainerWithConnect.js
+
+import React from 'react'
+import { connect } from 'react-redux'
+import Counter from '../todoComponents/Counter'
+import { increase, decrease, setDiff } from '../modules/counter'
+
+function CounterContainer({number, diff, onIncrease, onDecrease, onSetDiff}){
+    console.log('CounterContainerWithConnect')
+    return (
+        <Counter
+            number={number}
+            diff={diff}
+            onIncrease={onIncrease}
+            onDecrease={onDecrease}
+            onSetDiff={onSetDiff}
+        />
+    )
+}
+
+// mapStateToProps는 리덕스 스토어의 state를 조회해서 어떤 것을 컴포넌트의 props로 넣어줄지 정의한다.
+const mapStateToProps = state => ({
+    number: state.counter.number,
+    diff: state.counter.diff
+})
+
+// mapDispatchToProps는 리덕스 스토어의 dispatch를 컴포넌트의 props로 넣어주는 역할이다.
+const mapDispatchToProps = dispatch => ({
+    onIncrease: () => dispatch(increase()),
+    onDecrease: () => dispatch(decrease()),
+    onSetDiff: diff => dispatch(setDiff(diff))
+})
+
+// react-redux의 connect함수는 인자로 mapStateToProps와 mapDispatchToProps를 받는다.
+export default connect(mapStateToProps, mapDispatchToProps)(CounterContainer)
+
+/*
+// 위와 동일한 export
+const enhance = connect(mapStateToProps, mapDispatchToProps);
+export default enhance(CounterContainer)
+*/
+
+```
+
+### connect, 알아둬야 하는 것들
+
+1. [mapStateToProps](https://react-redux.js.org/api/connect#mapstatetoprops-state-ownprops-object)의 두번재 파라미터 ownProps
+: mapStateToProps의 두번째 파라미터 ownProps는 컨테이터 컴포넌트를 랜더링할 때 직접 넣어주는 props를 말한다.
+```js
+const mapStateToProps = (state, ownProps) => {
+    todo: state.todos[ownProps.id]
+}
+```
+위와 같이 특정 state를 조회할지 설정하기 위해 ownProps를 사용할 수 있다.
+
+
+2. connect의 3번째 파라미터 [mergeProps](https://react-redux.js.org/api/connect#mergeprops-stateprops-dispatchprops-ownprops-object)
+: mergeProps는 컴포넌트가 실제로 전달 받게 될 props를 정의한다.
+```js
+(stateProps, dispatchProps, ownProps) => Object
+```
+이 함수를 정의하지 않으면 결과는 
+```js
+{ ...ownProps, ...stateProps, ...dispatchProps }
+```
+이다. (사용할 일 없다.)
+
+3. connect의 4번째 파라미터 [options](https://react-redux.js.org/api/connect#options-object)
+: connect 함수를 사용 할 때 이 컨테이너 컴포넌트가 어떻게 동작할지에 대한 옵션을 4번째 파라미터를 통해 설정 할 수 있습니다. 이는 생략해도 되는 파라미터입니다. 이 옵션들은 따로 커스터마이징하게 되는일이 별로 없습니다. 자세한 내용은 [링크](https://react-redux.js.org/api/connect#options-object)를 참조하세요. 이 옵션을 통하여 Context 커스터마이징, 최적화를 위한 비교 작업 커스터마이징, 및 ref 관련 작업을 할 수 있습니다.
