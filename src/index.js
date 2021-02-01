@@ -13,12 +13,13 @@ import AppMiddleware from './AppMiddleware'
 import reportWebVitals from './reportWebVitals';
 // import './reduxExercise'
 
-import {createStore} from 'redux'
+import {createStore, applyMiddleware} from 'redux'
 import { Provider } from 'react-redux';
 import rootReducer from './modules'
-import { composeWithDevTools } from 'redux-devtools-extension';
+// import { composeWithDevTools } from 'redux-devtools-extension';
+import myLogger from './middlewares/myLogger'
 
-const store = createStore(rootReducer, composeWithDevTools())
+const store = createStore(rootReducer, applyMiddleware(myLogger))
 // console.log(store.getState())
 
 ReactDOM.render(
