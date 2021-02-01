@@ -118,7 +118,6 @@ import {createStore, applyMiddleware} from 'redux'
 const store = createStore(rootReducer, applyMiddleware(myLogger))
 ```
 
-![gif 추가 : console에 myLogger 동작하는 gif]()
 
 
 ### 미들웨어 수정하기
@@ -254,4 +253,96 @@ const store = createStore(
     - action 객체를 dispatch하는 소스를 thunk 함수를 dispatch 하는 것으로 변경
 
 
-![1초 딜레이 확인]()
+![1초 딜레이 확인](../img/redux06.gif)
+
+
+## 7-5. redux-thunk로 프로미스 다루기
+
+프로미스에 대하여 잘 알고있다는 전제하에 진행됩니다. 혹시나 잘 모르신다면 다음 링크들을 참조하세요.
+
+https://learnjs.vlpt.us/async/
+https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Promise
+
+### Promise 정리
+> 출처 : https://joshua1988.github.io/web-development/javascript/promise-for-beginners/
+제이쿼리를 이용한 데이터를 가져오는 기본Promise 형태
+```js
+function getDataPromise() {
+    return new Promise( (resolve, reject) => {
+        $.get('url', (res) => {
+            resolve(res)
+        })
+    })
+}
+
+getDataPromise().then( (data) => {
+    console.log(data)
+})
+```
+
+- Promise의 3가지 상태
+    1. pending : new Promise() Promise 객체를 생성하면 pending 상태이다. 파라미터로 콜백함수를 선언할 수 있다. 콜백함수의 파라미터는 resolve와 reject이다.
+
+    2. fulfilled : 파라미터로 받은 콜백함수의 resolve를 실행하면 fullfilled 상태가 된다. resolve가 실행되어 fulfilled 상태가 되면 .then()으로 결과 값을 받을 수 있다. .then() 메소드를 호출하면 새로운 Promise객체가 반환되기 때문에 Promise Chaining이 가능하다.
+
+    3. reject : resolve대신 reject를 실행하면 reject 상태가 된다. 실패 이유는 .catch()로 받을 수 있다.
+
+![](https://joshua1988.github.io/images/posts/web/javascript/promise.svg)
+
+### 가짜 API 함수 만들기
+먼저, Promise를 사용하여 데이터를 반환하는 가짜 API 함수를 만들어본다. /src/api/posts.js 라는 파일을 생성하여 다음 코드를 작성한다.
+
+```js
+// /src/api/posts.js
+
+const sleep = n => new Promise( resolve => setTimeout(resolve, n));
+
+// 가짜 포스트 목록 데이터
+const posts = [
+  {
+    id: 1,
+    title: '리덕스 미들웨어를 배워봅시다',
+    body: '리덕스 미들웨어를 직접 만들어보면 이해하기 쉽죠.'
+  },
+  {
+    id: 2,
+    title: 'redux-thunk를 사용해봅시다',
+    body: 'redux-thunk를 사용해서 비동기 작업을 처리해봅시다!'
+  },
+  {
+    id: 3,
+    title: 'redux-saga도 사용해봅시다',
+    body:
+      '나중엔 redux-saga를 사용해서 비동기 작업을 처리하는 방법도 배워볼 거예요.'
+  }
+];
+
+export const getPosts = async () => {
+    await sleep(500);
+    return posts;
+}
+
+// ID로 포스트를 조회하는 비동기 함수
+export const getPostById = async id => {
+  await sleep(500); // 0.5초 쉬고
+  return posts.find(post => post.id === id); // id 로 찾아서 반환
+};
+```
+
+
+### posts 리덕스 모듈 준비하기
+이제, posts라는 리덕스 모듈을 준비한다.
+
+Promise객체를 다루는 리덕스 모듈을 만들때는 다음 사항을 고려해야한다.
+- Promise가 시작, 성공, 실패 (pending, fulfilled, reject) 했을 때 각각에 맞는 action을 dispatch해야한다.
+- 각 Promise 마다 thunk 함수를 만들어줘야 한다.  (thunk함수란, dispatch와 getState를 인자로 갖는 함수를 리턴하는 함수)
+- reducer에서 action에 따라 로딩중, 성공, 에러 상태를 변경해주어야 한다.
+
+#### /src/modules/posts.js
+1. action type 정의
+2. action creator 함수 정의, redux-thunk를 사용할 때는 thunk함수를 반환하는 action creator를 정의하면 된다.
+3. initialState
+4. reducer 함수 정의
+
+
+#### 리덕스 모듈 리팩토링 하기
