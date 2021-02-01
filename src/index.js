@@ -8,7 +8,8 @@ import './index.css';
 // import AppTodo from './AppTodo'
 // import AppUsers from './AppUsers'
 // import AppRouter from './AppRouter'
-import AppRedux from './AppRedux'
+// import AppRedux from './AppRedux'
+import AppMiddleware from './AppMiddleware'
 import reportWebVitals from './reportWebVitals';
 // import './reduxExercise'
 
@@ -22,7 +23,7 @@ const store = createStore(rootReducer, composeWithDevTools())
 
 ReactDOM.render(
   <Provider store={store}>
-    <AppRedux />
+    <AppMiddleware />
   </Provider>  ,
   document.getElementById('root')
 );
