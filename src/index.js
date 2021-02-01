@@ -16,10 +16,14 @@ import reportWebVitals from './reportWebVitals';
 import {createStore, applyMiddleware} from 'redux'
 import { Provider } from 'react-redux';
 import rootReducer from './modules'
-// import { composeWithDevTools } from 'redux-devtools-extension';
-import myLogger from './middlewares/myLogger'
+import { composeWithDevTools } from 'redux-devtools-extension';
+// import myLogger from './middlewares/myLogger'
+import logger from 'redux-logger'
 
-const store = createStore(rootReducer, applyMiddleware(myLogger))
+const store = createStore(
+  rootReducer, 
+  composeWithDevTools(applyMiddleware(logger)) 
+);
 // console.log(store.getState())
 
 ReactDOM.render(

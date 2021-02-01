@@ -154,3 +154,31 @@ const myThunk = () => (dispatch, getState) => {
 dispatch(myThunk())
 ```
 
+
+## 7-3. redux-logger 사용 및 미들웨어와 DevTools 함께 사용하기
+
+### redux-logger 사용하기
+```bash
+npm install redux-logger
+```
+
+index.js에서 redux-logger를 불러와 적용해본다.
+
+```js
+import logger from 'redux-logger'
+
+const store = createStore(rootReducer, applyMiddleware(logger))
+```
+
+
+### Redux DevTools 사용하기
+[메뉴얼 문서](https://www.npmjs.com/package/redux-devtools-extension#usage)에서 다음과 같이 안내하고 있다.
+```js
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+
+const store = createStore(reducer, composeWithDevTools(
+  applyMiddleware(...middleware),
+  // other store enhancers if any
+));
+```
