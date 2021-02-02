@@ -442,3 +442,26 @@ posts 리덕스 모듈 구현이 끝났다. 이제 컴포넌트를 구현해보�
 ![](../img/redux07.PNG)
 
 ### 리액트 라우터 적용하기
+지금까지 react App에 redux 모듈을 정의하고 redux로 상태관리를 하도록 구현하였다. 또한, API 호출을 통해 비동기로 데이터를 받아오며, 비동기 상태 관리를 위해 redux-thunk 미들웨어를 적용하였다.
+
+이제 react-router를 적용해서 posts 리스트 중 특정 post를 클릭했을 때 post.body를 보여주는 기능을 구현해본다.
+
+- index.js 에 &lt;BrowserRouter&gt;로 App컴포넌트 감싸기
+- Post.js 프리젠테이셔널 컴포넌트 구현
+- PostContainer.js 컨테이너 컴포넌트 구현
+- route 설정하기
+    - pages 디렉터리를 생성
+    - PostListPage.js 작성
+    - PostPage.js 작성
+    - AppPost.js에서 Route 컴포넌트를 설정
+    - PostList 컴포넌트에 Link 컴포넌트 설정
+
+특정 PostList를 선택했을 때 해당 Post 내용이 잘 출력되는지 확인해보자.
+
+![](../img/redux08.PNG)
+
+동작은 잘 하지만, 현재 두가지 문제점이 있다.
+1. 특정 포스트를 열고 뒤로가기를 했을 때, 포스트 목록을 다시 불러오면서 '로딩중'이 나타난다.
+2. 특정 포스트를 열고 뒤로가기 한 다음, 다른 포스트를 열면 이전에 열었던 포스트 내용이 잠깐 보여진다.
+
+다음 색션에서 두가지 문제점을 해결해본다.

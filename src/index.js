@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter } from 'react-router-dom'
 import './index.css';
 // import App from './App';
 // import AppSass from './AppSass'
@@ -29,9 +29,12 @@ const store = createStore(
 // console.log(store.getState())
 
 ReactDOM.render(
-  <Provider store={store}>
-    <AppPost />
-  </Provider>  ,
+  <BrowserRouter>
+    <Provider store ={store}>
+      <AppPost />
+    </Provider>  
+  </BrowserRouter>
+  ,
   document.getElementById('root')
 );
 
