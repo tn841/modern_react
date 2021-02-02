@@ -10,6 +10,8 @@ const GET_POST = 'GET_POST'
 const GET_POST_SUCCESS = 'GET_POST_SUCCESS'
 const GET_POST_ERROR = 'GET_POST_ERROR'
 
+const CLEAR_POST = 'CLEAR_POST'
+
 
 // 2. action creator 함수 정의
 // thunk를 사용할 때는 thunk함수에서 바로 action 객체를 생성해도 된다.
@@ -27,6 +29,7 @@ thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는�
  */
 export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts)
 export const getPost = createPromiseThunk(GET_POST, postsAPI.getPostById)
+export const clearPost = () => ({type:CLEAR_POST})
 
 // function getPosts(){ //thunk 함수
 //     return async (dispatch, getState) => {
@@ -62,11 +65,16 @@ export default function posts(state=initialState, action) {
         case GET_POSTS:
         case GET_POSTS_SUCCESS:
         case GET_POSTS_ERROR:
-            return handleAsyncActions(GET_POSTS, 'posts')(state, action)
+            return handleAsyncActions(GET_POSTS, 'posts', true)(state, action)
         case GET_POST:
         case GET_POST_SUCCESS:
         case GET_POST_ERROR:
             return handleAsyncActions(GET_POST, 'post')(state, action)
+        case CLEAR_POST:
+            return {
+                ...state,
+                post: reducerUtils.initial()
+            }
         default:
             return state;
     }
