@@ -2,7 +2,7 @@
 // 내부에 Promise 객체(API 통신)를 사용하는 Thunk 함수를 생성해주는 함수정의
 // createPromiseThunk(GET_POSTS, postAPI.getPosts)
 export const createPromiseThunk = (type, promiseCreator) => {
-    const [SUCCESS, ERROR] = [`$(type)_SUCCESS`, `$(type)_ERROR`]
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
 
     return param => async (dispatch, getState) => {
         dispatch({type, param});
@@ -11,7 +11,7 @@ export const createPromiseThunk = (type, promiseCreator) => {
             const payload = await promiseCreator(param)
             dispatch({type: SUCCESS, payload})
         } catch (e) {
-            dispatch({type: ERROR, payload: e, error: true})
+            dispatch({type: ERROR, error: e})
         }
     }
 }
@@ -33,7 +33,7 @@ export const reducerUtils = {
         data: payload,
         error: null
     }),
-    error: error =>({
+    error: error => ({
         loading: false,
         data: null,
         error: error
@@ -44,7 +44,7 @@ export const reducerUtils = {
 // 비동기 관련 액션들을 처리하는 리듀서를 만들어줍니다.
 // type 은 액션의 타입, key 는 상태의 key (예: posts, post) 입니다.
 export const handleAsyncActions = (type, key) => {
-    const [SUCCESS, ERROR] = [`$(type)_SUCCESS`, `$(type)_ERROR`];
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
     return (state, action) => {
         switch (action.type) {
             case type:
@@ -60,7 +60,7 @@ export const handleAsyncActions = (type, key) => {
             case ERROR:
                 return {
                     ...state,
-                    [key]: reducerUtils.error(action.error)
+                    [key]: reducerUtils.error(action.payload)
                 }
             default:
                 return state;

@@ -1,4 +1,4 @@
-import * as postAPI from '../api/posts'
+import * as postsAPI from '../api/posts'
 import { createPromiseThunk, reducerUtils, handleAsyncActions } from '../lib/asyncUtils'
 
 // 1. action type 정의
@@ -25,8 +25,8 @@ action creator를 정의하는 단계이다.
 thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는다.
 
  */
-export const getPosts = createPromiseThunk(GET_POSTS, postAPI.getPosts)
-export const getPost = createPromiseThunk(GET_POST, postAPI.getPost)
+export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts)
+export const getPost = createPromiseThunk(GET_POST, postsAPI.getPostById)
 
 // function getPosts(){ //thunk 함수
 //     return async (dispatch, getState) => {

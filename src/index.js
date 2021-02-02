@@ -9,7 +9,8 @@ import './index.css';
 // import AppUsers from './AppUsers'
 // import AppRouter from './AppRouter'
 // import AppRedux from './AppRedux'
-import AppMiddleware from './AppMiddleware'
+// import AppMiddleware from './AppMiddleware'
+import AppPost from './AppPost'
 import reportWebVitals from './reportWebVitals';
 // import './reduxExercise'
 
@@ -29,7 +30,7 @@ const store = createStore(
 
 ReactDOM.render(
   <Provider store={store}>
-    <AppMiddleware />
+    <AppPost />
   </Provider>  ,
   document.getElementById('root')
 );

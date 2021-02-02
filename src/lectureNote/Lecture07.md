@@ -432,3 +432,13 @@ export const handleAsyncActions = (type, key) => {
 }
 ```
 
+### post 컴포넌트 구현하기
+posts 리덕스 모듈 구현이 끝났다. 이제 컴포넌트를 구현해보자.
+
+- /src/components/PostList.js 프리젠테이셔널 컴포넌트 구현
+- /src/container/PostListContainer.js 컨테이너 컴포넌트 구현
+- /src/AppPost.js 에 랜더링하기
+
+![](../img/redux07.PNG)
+
+### 리액트 라우터 적용하기
