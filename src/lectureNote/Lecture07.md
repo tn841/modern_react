@@ -260,8 +260,8 @@ const store = createStore(
 
 프로미스에 대하여 잘 알고있다는 전제하에 진행됩니다. 혹시나 잘 모르신다면 다음 링크들을 참조하세요.
 
-https://learnjs.vlpt.us/async/
-https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Promise
+- https://learnjs.vlpt.us/async/
+- https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Promise
 
 ### Promise 정리
 > 출처 : https://joshua1988.github.io/web-development/javascript/promise-for-beginners/
@@ -346,3 +346,55 @@ Promise객체를 다루는 리덕스 모듈을 만들때는 다음 사항을 고
 
 
 #### 리덕스 모듈 리팩토링 하기
+위에서 작성한 posts 리덕스 모듈을 반복되는 코드들이 상당히 많다. 이런 반복되는 코드는 따로 함수화 하여 리팩토링을 하는 습관을 들이자.
+
+반복되는 코드는 다음과 같다.
+- thunk 함수를 만들어주는 action creator
+- reducer에서 loading, success, error 상태를 정의하는 코드
+
+/src/lib 디렉토리를 만들고, asyncUtils.js 파일을 만든다.
+
+#### /src/lib/asyncUtils.js
+```js
+
+// 내부에 Promise 객체(API 통신)를 사용하는 Thunk 함수를 생성해주는 함수정의
+export const createPromiseThunk = (type, promiseCreator) => {
+    const [SUCCESS, ERROR] = [`$(type)_SUCCESS`, `$(type)_ERROR`]
+
+    return param => async (dispatch, getState) => {
+        dispatch({type, param});
+        try {
+            // 결과물은 payload 라는 이름으로 통일한다.
+            const payload = await promiseCreator(param)
+            dispatch({type: SUCCESS, payload})
+        } catch (e) {
+            dispatch({type: ERROR, payload: e, error: true})
+        }
+    }
+}
+
+// 리듀서 반복되는 코드를 리팩토링 하기위한 코드
+export const reducerUtils = {
+    initial: (initialData = null) => ({
+        loading: false,
+        data: initialData,
+        error: null
+    }),
+    loading: (prevState=null) => ({
+        loading: true,
+        data: prevState,
+        error: null
+    }),
+    success: payload => ({
+        loading: false,
+        data: payload,
+        error: null
+    }),
+    error: error =>({
+        loading: false,
+        data: null,
+        error: error
+    })
+}
+
+```

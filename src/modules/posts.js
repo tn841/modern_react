@@ -1,4 +1,5 @@
 import * as postAPI from '../api/posts'
+import { createPromiseThunk, reducerUtils } from '../lib/asyncUtils'
 
 // 1. action type 정의
 const GET_POSTS = 'GET_POSTS'
@@ -24,40 +25,35 @@ action creator를 정의하는 단계이다.
 thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는다.
 
  */
-function getPosts(){ //thunk 함수
-    return async (dispatch, getState) => {
-        dispatch({type:GET_POSTS})
-        try {
-            const data = await postAPI.getPosts();
-            dispatch({type:GET_POSTS_SUCCESS, data})
-        } catch (e) {
-            dispatch({type:GET_POSTS_ERROR, error: e})
-        }
-    }
-} 
+export const getPosts = createPromiseThunk(GET_POSTS, postAPI.getPosts)
+export const getPost = createPromiseThunk(GET_POST, postAPI.getPost)
 
-const getPost = (id) => async (dispatch, getState) => {
-    dispatch({type: GET_POST})
-    try {
-        const res = await postAPI.getPost(id)
-        dispatch({type: GET_POST_SUCCESS})
-    } catch (e) {
-        dispatch({type: GET_POST_ERROR})
-    }
-}
+// function getPosts(){ //thunk 함수
+//     return async (dispatch, getState) => {
+//         dispatch({type:GET_POSTS})
+//         try {
+//             const data = await postAPI.getPosts();
+//             dispatch({type:GET_POSTS_SUCCESS, data})
+//         } catch (e) {
+//             dispatch({type:GET_POSTS_ERROR, error: e})
+//         }
+//     }
+// } 
+
+// const getPost = (id) => async (dispatch, getState) => {
+//     dispatch({type: GET_POST})
+//     try {
+//         const res = await postAPI.getPost(id)
+//         dispatch({type: GET_POST_SUCCESS})
+//     } catch (e) {
+//         dispatch({type: GET_POST_ERROR})
+//     }
+// }
 
 // 3. initialState
 const initialState = {
-    posts: {
-        loading: false,
-        data: null,
-        error: null
-    },
-    post: {
-        loading: false,
-        data: null,
-        error: null
-    }
+    posts: reducerUtils.initial(),
+    post: reducerUtils.initial()
 }
 
 // 4. reducer 함수
@@ -66,58 +62,34 @@ export default function posts(state=initialState, action) {
         case GET_POSTS:
             return {
                 ...state,
-                posts: {
-                    loading: true,
-                    data: null,
-                    error: null
-                }
+                posts: reducerUtils.loading()
             }
         case GET_POSTS_SUCCESS:
             return {
                 ...state,
-                posts: {
-                    loading: false,
-                    data: action.posts,
-                    error: null   
-                }
+                posts: reducerUtils.success(action.payload)
             }
         case GET_POSTS_ERROR:
             return {
                 ...state,
-                posts: {
-                    loading: false,
-                    data: null,
-                    error: action.error
-                }
+                posts: reducerUtils.error(action.error)
             }
         case GET_POST:
             return {
                 ...state,
-                post: {
-                    loading: true,
-                    data: null,
-                    error: null
-                }
+                post: reducerUtils.loading()
             };
-            case GET_POST_SUCCESS:
+        case GET_POST_SUCCESS:
             return {
                 ...state,
-                post: {
-                    loading: true,
-                    data: action.post,
-                    error: null
-                }
+                post: reducerUtils.success(action.payload)
             };
-            case GET_POST_ERROR:
+        case GET_POST_ERROR:
             return {
                 ...state,
-                post: {
-                    loading: true,
-                    data: null,
-                    error: action.error
-                }
+                post: reducerUtils.error(action.error)
             };
-            default:
+        default:
                 return state;
     }
 }
