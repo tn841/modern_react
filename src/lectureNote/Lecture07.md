@@ -458,7 +458,7 @@ posts 리덕스 모듈 구현이 끝났다. 이제 컴포넌트를 구현해보�
 
 특정 PostList를 선택했을 때 해당 Post 내용이 잘 출력되는지 확인해보자.
 
-![](../img/redux08.PNG)
+![](../img/redux09.gif)
 
 동작은 잘 하지만, 현재 두가지 문제점이 있다.
 1. 특정 포스트를 열고 뒤로가기를 했을 때, 포스트 목록을 다시 불러오면서 '로딩중'이 나타난다.
@@ -521,5 +521,94 @@ useEffect(() => {
   }, [data, dispatch]);
 ```
 
-### 포스트 조회 시 재로딩 문제 해결하기
-특정 post id를 조회할 때 발생하는 재로딩 문제는 postList 재로딩 문제와 같은 방식으로는 처리할 수 없다.
+![](../img/redux10.gif
+)
+
+### 포스트 조회 시 문제 해결하기
+특정 post id를 조회할 때 발생하는 이전 포스트 내용이 잠깐 보이는 문제는 postList 재로딩 문제와 같은 방식으로는 처리할 수 없다. 주어진 post id에 따라 다른 결과물을 보여줘야하기 때문이다.
+
+1. 컴포넌트가 언마운트 될 때 포스트 내용을 비우도록 하는 것
+2. 이미 불러온 POST 내용을 다시 불러오는 문제
+
+
+#### 1. 컴포넌트가 언마운트 될 때 포스트 내용을 비우는 처리
+- posts redux 모듈에 CLEAR_POST라는 액션을 정의하고 해당 action이 dispatch되었을 때, status.post의 내용을 비워준다.
+- Post 컨테이너 컴포넌트의 useEffect의 return 함수 부분(언마운트 될때 실행되는 함수)에 CLEAR_POST action을 dispatch시켜준다.
+
+```js
+useEffect(() => {
+    dispatch(getPost(postId));
+    return () => {
+      dispatch(clearPost()); // 컴포넌트 언마운트 시점에 실행
+    };
+  }, [postId, dispatch]);
+```
+
+이렇게 하면 이전 포스트 내용이 잠깐 보이는 이슈가 해결 된다.
+
+다만, 이미 읽었던 포스트를 불러오는 경우에도 새로 API요청을 하는 이슈가 아직 남아 있다. 이 문제를 개선하려면 posts redux 모듈에서 관리하는 state의 구조를 변경해야한다.
+
+#### 2. 이미 불러온POST 내용을 다시 불러오는 문제
+
+현재 redux state는 다음과 같다.
+```js
+{
+  posts: {
+    data,
+    loading,
+    error
+  },
+  post: {
+    data,
+    loading,
+    error,
+  }
+}
+```
+
+변경할 구조는 다음과 같다.
+```js
+{
+  posts: {
+    data,
+    loading,
+    error
+  },
+  post: {
+    '1': {
+      data,
+      loading,
+      error
+    },
+    '2': {
+      data,
+      loading,
+      error
+    },
+    [id]: {
+      data,
+      loading,
+      error
+    }
+  }
+}
+```
+
+state를 변경하려면 기존에 생성했던 asyncUtils에 만든 여러 함수를 수정해줘야한다. 기존 함수를 수정하는 대신, 새로운 이름으로 새 함수를 작성해본다.
+
+- createPromiseThunkById : action creator 함수 생성시 thunk 함수를 만들어주는 함수
+- handleAsyncActionsById : reducer에서 action에 따른 처리를 담당하는 함수
+
+이제부터 비동기 작업과 관련된 action이 어떤 postId를 가르키는지 앟아야 한다. 그렇게 하기 위해서는 앞으로 action.meta 값에 id를 넣어주도록 한다.
+
+#### /src/lib/asyncUtils.js
+...
+
+
+기존의 CLEAR_POST 액션은 더이상 필요하지 않다.
+
+이제 state를 변경이 완료되었다. post 재로딩 방지를 위한 방법으로는, postList 재로딩 방지를 위한 방법과 동일하게 두가지 방식이 있다.
+
+모두 구현 해보자.
+
+- 해당 ID의 post 데이터가 state에 있으면 API 요청 방지

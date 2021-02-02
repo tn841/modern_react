@@ -1,5 +1,11 @@
 import * as postsAPI from '../api/posts'
-import { createPromiseThunk, reducerUtils, handleAsyncActions } from '../lib/asyncUtils'
+import { 
+    createPromiseThunk, 
+    reducerUtils, 
+    handleAsyncActions,
+    createPromiseThunkById,
+    handleAsyncActionById
+} from '../lib/asyncUtils'
 
 // 1. action type 정의
 const GET_POSTS = 'GET_POSTS'
@@ -28,7 +34,7 @@ thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는�
 
  */
 export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts)
-export const getPost = createPromiseThunk(GET_POST, postsAPI.getPostById)
+export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById)
 export const clearPost = () => ({type:CLEAR_POST})
 
 // function getPosts(){ //thunk 함수
@@ -56,7 +62,7 @@ export const clearPost = () => ({type:CLEAR_POST})
 // 3. initialState
 const initialState = {
     posts: reducerUtils.initial(),
-    post: reducerUtils.initial()
+    post: {}
 }
 
 // 4. reducer 함수
@@ -69,7 +75,7 @@ export default function posts(state=initialState, action) {
         case GET_POST:
         case GET_POST_SUCCESS:
         case GET_POST_ERROR:
-            return handleAsyncActions(GET_POST, 'post')(state, action)
+            return handleAsyncActionById(GET_POST, 'post')(state, action)
         case CLEAR_POST:
             return {
                 ...state,
