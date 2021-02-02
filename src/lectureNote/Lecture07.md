@@ -398,3 +398,37 @@ export const reducerUtils = {
 }
 
 ```
+
+그리고 /src/modules/posts.js 에서 asyncUtitls 함수들을 사용하여 반복되는 코드를 리팩토링한다.
+
+action creator와 reducer 함수의 반복되는 코드를 리팩토링했지만, 아직도 리듀서 쪽에는 반복되는 코드가 많이 있다. 그것은 바로 비동기 관련 action을 처리하기 위해 작성하는 TYPE, TYPE_SUCCESS, TYPE_ERROR 코드 묶음이다.
+
+#### /src/lib/asyncUtils.js
+```js
+...
+export const handleAsyncActions = (type, key) => {
+    const [SUCCESS, ERROR] = [`$(type)_SUCCESS`, `$(type)_ERROR`];
+    return (state, action) => {
+        switch (action.type) {
+            case type:
+                return {
+                    ...state,
+                    [key]: reducerUtils.loading()
+                }
+            case SUCCESS:
+                return {
+                    ...state,
+                    [key]: reducerUtils.success(action.payload)
+                }
+            case ERROR:
+                return {
+                    ...state,
+                    [key]: reducerUtils.error(action.error)
+                }
+            default:
+                return state;
+            }
+    }
+}
+```
+
