@@ -473,7 +473,8 @@ PostList 재로딩 문제 해결방안은 두가지가 있다.
 1. 데이터가 존재하는 경우 API 요청을 하지 않는 방법
 2. API 요청을 하는데, 로딩중 메시지를 띄우지 않는 방법 : 이 방법은 사용자 입장에서는 재로딩이 되지 않는 것처럼 보이면서도 뒤로가기 했을 때 최신 데이터로 갱신할 수 있다.
 
-1. 데이터가 존재하는 경우 API요청을 하지 않는 방법
+
+### 1. 데이터가 존재하는 경우 API요청을 하지 않는 방법
 ```js
 // /src/containers/PostListContainer.js
 
@@ -484,5 +485,41 @@ useEffect(() => {
 
 ```
 
-2. API 요청을 하지만 '로딩중' 문구를 띄우지 않기
-- /src/lib/asyncUtils.js　
+### 2. API 요청을 하지만 '로딩중' 문구를 띄우지 않기
+- /src/lib/asyncUtils.js　- handleAsyncAction 함수 : 리듀서 로직을 리턴해주는 handelAsyncAction 함수에 keepData 파라미터를 추가한다. keepData 파라미터가 true이면 로딩할 때에도 데이터를 유지하도록 reducer 함수 로직을 수정한다.
+```js
+export const handleAsyncActions = (type, key, keepData = false) => {
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+    return (state, action) => {
+        switch(action.type) {
+            case type:
+                return {
+                    ...state,
+                    [key]: reducerUtils.loading(keepDate ? state[key].data : null)
+                };
+            ...
+        }
+    }
+}
+```
+- /src/modules/posts.js - posts 리듀서 함수 : keepData 파라미터를 true로 넘겨 데이터를 유지하도록 설정한다.
+```js
+export default function posts(state = initialState, action) {
+  switch (action.type) {
+    case GET_POSTS:
+    case GET_POSTS_SUCCESS:
+    case GET_POSTS_ERROR:
+      return handleAsyncActions(GET_POSTS, 'posts', true)(state, action);
+    ...
+```
+- /src/container/PostListContainer.js
+```js
+
+useEffect(() => {
+    // if (data) return;
+    dispatch(getPosts());
+  }, [data, dispatch]);
+```
+
+### 포스트 조회 시 재로딩 문제 해결하기
+특정 post id를 조회할 때 발생하는 재로딩 문제는 postList 재로딩 문제와 같은 방식으로는 처리할 수 없다.

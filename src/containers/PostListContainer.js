@@ -8,13 +8,11 @@ function PostListContainer(){
     const dispatch = useDispatch();
 
     useEffect(() => {
-        if(!data){
-            dispatch(getPosts())
-        }
+        dispatch(getPosts())
         return () => {
             
         }
-    }, [dispatch, data])
+    }, [dispatch])
 
     if(loading && !data) return <div>로딩중</div>
     if(error) return <div>에러가 발생했습니다.</div>
