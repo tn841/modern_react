@@ -836,3 +836,92 @@ axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? '/' : 'https:/
 ```process.env.NODE_ENV```는 현재 환경이 운영인지 개발인지 구별하는 값이다.
 
 위와 같이 설정을 하면 개발인 경우 프록시 서버쪽으로 요청하고, 운영인경우 실제 API서버로 요청을 하게된다.
+
+## 7-10. redux-saga
+[redux-saga](https://github.com/redux-saga/redux-saga)는 redux-thunk다음으로 가장 많이 사용되는 미들웨어이다.
+
+redux-thunk는 함수를 dispatch할 수 있게 해주는 미들웨어였다. redux-saga는 action을 모니터링하고 있다가, 특정 action이 발생하면 이에 따라 특정 작업을 실행하는 방식으로 사용한다. 여기서 특정 작업이란, JS를 실행할 수도 있고 다른 action을 dispatch할 수 도 있고, 현재 state를 확인할 수 도 있다.
+
+redux-saga는 redux-thunk로 구현하지 못하는 다양한 작업들을 처리할 수 있다.
+- 비동기 작업 진행 중 요청을 취소 할 수 있다.
+- 특정 action이 발생했을 때, 이에 따라 다른 action이 dispatch되게끔 하거나, JS 코드를 실행할 수 있다.
+- websocket을 사용하는 경우 Channel이라는 기능을 사용하여 더욱 효율적으로 코드를 관리할 수 있다.
+- API 요청이 실패했을 때 재요청하는 작업을 할 수 있다.
+
+이것 말고도 다양한 까다로운 비동기 작업들을 redux-saga를 사용하여 처리할 수 있다.
+
+redux-saga는 다양한 기능을 제공하는 만큼 진입장벽이 꽤나 크다. JS의 [Generator](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Generator)문법을 사용한다.
+
+### Generator 문법 학습
+generator 문법의 핵심은 함수를 특정 구간에 멈춰놓을 수 있고, 원할 때 다시 동작하게 할 수 있다는 것이다. 
+
+예를 들어, 다음과 같은 함수를 살펴보자.
+```js
+function weiredFunction(){
+    return 1;
+    return 2;
+    return 3;
+    return 4;
+    return 5;
+}
+```
+위와 같이 함수에서 값을 여러번 반환하는 것은 불가능하다. weiredFunction함수를 호출하면 무조건 1을 반환할 것이다.
+
+하지만, 제너레이터 함수를 사용하면 값을 순차적으로 반환할 수 있다. 함숫의 흐름을 도중에 멈춰놓았다가 나중에 이어서 진행 할 수도 있다.
+
+다음 함수를 작성해보자.
+```js
+function* generatorFunction() {
+    console.log('hi')
+    yield 1;
+    console.log('hi2')
+    yield 2;
+    console.log('hi3')
+    yield 3;
+    return 4;
+}
+```
+제너레이터 함수를 만들 때는 ```function*``` 키워드를 사용한다.
+
+제너레이터 함수를 호출하면 한 객체가 반환되는데, 이를 제너레이터라고 부른다.
+
+generatorFunction()을 호출하여 제너레이터 객체를 생성해보자.
+```js
+const generator = generatorFunction()
+```
+
+제너레이터 함수는 호출했을 때 바로 해당 함수의 결과값이 나오지 않는다. ```generator.next()```와 같이 next() 메소드를 호출해야 코드가 실행되며, ```yield``` 키워드에서 값을 반환하고 코드의 흐름을 멈춘다. 
+
+next(1) 이렇게 파라미터를 넘겨 yield 키워드에서 해당 파라미터를 받을 수도 있다.
+```js
+let a = yield;
+```
+
+### Generator로 액션 모니터링 하기
+redux-saga는 액션을 모니터링 할 수 있다. Generator를 통해 어떻게 action을 모니터링 할 수 있는지 예시 코드를 보며 배워본다.
+
+```js
+function* watchGenerator() {
+    console.log('모니터링 시작');
+    while(true){
+        const action = yield;
+        if(action.type === 'HELLO') {
+            console.log('안녕하세요.')
+        }
+        if(action.type === 'BYE') {
+            console.log('안녕히가세요.)
+        }
+    }
+}
+```
+
+```js
+const watch = watchGenerator();
+watch.next(); // 모니터링 시작
+watch.next({type: 'HELLO'}); // 안녕하세요.
+watch.next({type: 'BYE'}); // 안녕히가세요.
+```
+
+redux-saga는 이러한 원리로 action을 모니터링하고, 특정 action이 발생했을 때 우리가 원하는 JS 코드를 실행시켜준다.
+
+### Redux-Saga 설치 및 비동기 카운터 만들기
