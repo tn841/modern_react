@@ -800,3 +800,39 @@ json-server가 정상적으로 실행되면 4000번 port로 데이터가 조회�
 - http://localhost:4000/posts/1
 
 ![](../img/json-server.PNG)
+
+
+
+
+## 7-9. CORS와 Webpack DevServer Proxy
+브라우저에서 API요청을 할때는 브라우저 현재 사이트의 도메인과 API요청 도메인이 일치해야지만 API요청을 할 수 있다. 만약 서로 다른 도메인에서 API요청을 하라면 CORS설정이 필요하다. (Cross Origin Resource Sharing)
+
+json-server로 만든 API 서버의 경우, 모든 도메인을 허용해주는 CORS 규칙이 적용되어 있다. 하지만 실제로는 특정 도메인만 허용하도록 해야한다.
+
+webpack DevServer에서 제공하는 Proxy라는 기능을 이용하면 도메인에 따른 CORS 규칙을 신경쓰지 않아도 된다.
+
+
+### proxy 설정하기
+![](https://i.imgur.com/8qNJaoI.png)
+Webpack DevServer의 Proxy를 사용하면, 브라우저에서 API 요청을 할 때 API서버로 직접 요청을 하지 않고, 현재 react App이 실행되고 있는 개발 서버로 요청을 하게된다. 그러면 Webpack DevServer에서 해당 요청을 받아 그대로 API 서버로 전달하고 응답을 반환하게 된다.
+
+Webpack DevServer의 Proxy 설정은 원래 webpack 설정을 통해 적용해야하지만, CRA를 통해 만든 리액트 프로젝트에서는 package.json에 "proxy" 값을 설정하여 쉽게 적용할 수 있다. [참조](https://create-react-app.dev/docs/proxying-api-requests-in-development)
+
+프로젝트의 package.json을 열어 다음과 같이 "proxy"를 설정해준다.
+
+#### package.json
+```js
+...
+"proxy": "http://localhost:4000"
+```
+그리고 react App을 재시작 해준다.
+
+만약 API서버와 react App이 같은 도메인에서 제공되는 경우, package.json의 proxy 설정만으로도 실제 운영을 해도 상관 없다. 하지만, 다른 경우엔 axios의 글로벌 [baseURL](https://github.com/axios/axios#global-axios-defaults)을 설정하면 된다.
+
+```js
+axios.defaults.baseURL = process.env.NODE_ENV === 'development' ? '/' : 'https://api.velog.io/';
+```
+
+```process.env.NODE_ENV```는 현재 환경이 운영인지 개발인지 구별하는 값이다.
+
+위와 같이 설정을 하면 개발인 경우 프록시 서버쪽으로 요청하고, 운영인경우 실제 API서버로 요청을 하게된다.
