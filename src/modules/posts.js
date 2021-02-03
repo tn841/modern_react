@@ -36,6 +36,9 @@ thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는�
 export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts)
 export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById)
 export const clearPost = () => ({type:CLEAR_POST})
+export const goToHome = () => (dispatch, getState, {history}) => {
+    history.push('/')
+}
 
 // function getPosts(){ //thunk 함수
 //     return async (dispatch, getState) => {
@@ -85,3 +88,5 @@ export default function posts(state=initialState, action) {
             return state;
     }
 }
+
+

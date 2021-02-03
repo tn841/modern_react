@@ -703,3 +703,100 @@ return handleAsyncActionsById(GET_POST, 'post', true)(state, action)
 ```
 
 데이터를 완전히 캐싱하고 싶다면 아예 API 요청을 하지 않는 방식을 택하고(1), 데이터가 바뀔 수 있는 가능성이 있다면 API 요청을 하지만 로딩중은 표시하지 않는 형태(2)로 구현한다.
+
+
+## 7-7. thunk에서 Router 연동하기
+thunk함수 내에서 Router를 사용하는 경우가 많다. 예를 들어 로그인 action이 성공하면 path('/')로 경로를 이동시키는 경우이다.
+
+histroy객체를 가져오기 위해 withRouter를 사용하여 컴포넌트의 props로 받아올 수 있지만, thunk에서 history 관련 처리를 하면 코드가 훨씬 깔끔해진다. 이것은 취향이다.
+
+### customHistory 만들어서 적용하기
+thunk에서 Router의 history객체를 사용하려면, BrowserHistory 인스턴스를 직접 만들어서 적용해야한다. index.js를 다음과 같이 수정한다.
+
+```js
+import { createBrowserHistory } from 'history'
+...
+const customHistory = createBrowserHistory()
+...
+ReactDOM.render(
+    <Router history={customHistory}>
+        ...
+    </Router>,
+    document.getElementById('root')
+)
+```
+
+그리고, redux-thunk의 withExtraArgument를 사용하면 thunk함수에서 사전에 정해준 값들을 참조 할 수 있다.
+
+```js
+const stroe = createStore(
+    rootReducer,
+    composeWithDevTools(
+        applyMiddleware(
+            ReduxThunk.withExtraArgument({history: customHistory}),
+            logger
+        )
+    )
+)
+```
+
+### 홈 화면으로 가는 thunk만들기
+이제 홈화면으로 가는 thunk를 작성해본다.
+
+#### /src/modules/posts.js - goHome 
+```js
+export const goToHome = () => (dispatch, getState, {history}) => {
+    history.push('/')
+}
+```
+
+PostContainer에서 goToHome thunk함수를 dispatch한다.
+### /src/containers/PostContainer.js
+```js
+<button onClick={() => dispatch(goToHome()) }>홈으로</button>
+```
+
+지금은 단순히 다른 작업을 하지 않고 바로 홈으로 이동하게끔 했지만, 실제 프로젝트에서는 getState() 를 사용하여 현재 리덕스 스토어의 상태를 확인하여 조건부로 이동을 하거나, 특정 API를 호출하여 성공했을 시에만 이동을 하는 형식으로 구현을 할 수 있답니다.
+
+## 7-8. json-server
+좀더 실무에 가까운 가짜 API 서버를 만들어 볼 것이다. 이때 사용되는 도구가 json-server 이다. json-server를 이용하면 json파일 하나로 연습용 API 서버를 쉽게 구성할 수 있다.
+
+json-server는 개발용이기 때문에 실제 운영을 하면 안된다.
+
+### 가짜 API 서버 열기
+먼저 프로젝트 디렉토리(src 밖)에 data.json 파일을 아래와 같이 작성한다.
+#### data.json
+```json
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "리덕스 미들웨어를 배워봅시다",
+      "body": "리덕스 미들웨어를 직접 만들어보면 이해하기 쉽죠."
+    },
+    {
+      "id": 2,
+      "title": "redux-thunk를 사용해봅시다",
+      "body": "redux-thunk를 사용해서 비동기 작업을 처리해봅시다!"
+    },
+    {
+      "id": 3,
+      "title": "redux-saga도 사용해봅시다",
+      "body": "나중엔 redux-saga를 사용해서 비동기 작업을 처리하는 방법도 배워볼 거예요."
+    }
+  ]
+}
+```
+
+이 파일을 기반으로 api서버를 연다.
+
+```bash
+npx json-server ./data.json --port 4000
+```
+
+json-server가 정상적으로 실행되면 4000번 port로 데이터가 조회된다.
+
+- http://localhost:4000/posts
+- http://localhost:4000/posts/1
+
+![](../img/json-server.PNG)
