@@ -925,3 +925,90 @@ watch.next({type: 'BYE'}); // 안녕히가세요.
 redux-saga는 이러한 원리로 action을 모니터링하고, 특정 action이 발생했을 때 우리가 원하는 JS 코드를 실행시켜준다.
 
 ### Redux-Saga 설치 및 비동기 카운터 만들기
+```bash
+npm install redux-saga
+```
+
+counter.js 리덕스 모듈을 열어 increaseAsync와 decreaseAsync thunk 함수를 지우고, 일반 액션함수로 대체한다.
+
+그 다음, increaseSaga, decreaseSaga를 다음과 같이 만들어 준다. redux-saga에서는 제너레이터 함수를 "saga"라고 부른다.
+
+#### /src/modules/counter.js
+```js
+import { delay, put } from 'redux-saga/effects';
+...
+export const increaseAsync = () => {
+    return {type:INCREASE_ASYNC}
+}
+export const decreaseAsync = () => {
+    return {type:DECREASE_ASYNC}
+}
+
+// 7-10. redux-saga의 제너레이터 함수(saga) 만들기
+function* increaseSaga() {
+    yield delay(1000) // 1초 지연
+    yield put(increase()) // put은 특정 action을 dispatch 해준다.
+}
+
+function* decreaseSaga(){
+    yield delay(1000)
+    yield put(decrease())
+}
+```
+
+'redux-saga/effects'에는 다양한 유틸함수들이 들어있다. 위에서 사용한 'put'함수는 매우 중요하다. 이 함수를 통해 새로운 action을 dispatch할 수 있다.
+
+takeEvery, takeLatest 라는 유틸함수를 사용해본다. 이 함수들은 action을 모니터링 하는 함수다. takeEvery는 특정 액션 타밉에 대하여 디스패치되는 모든 액션들을 처리하는 것이고, takeLatest는 특정 액션 타입에 대하여 디스패치된 마지막 액션만 처리하는 함수이다. 예를 들어 특정 액션을 처리하고 있는 동안 동일한 타입의 새로운 액션이 디스패치되면 기존 작업을 무시하고 새로운 작업을 시작한다.
+
+counterSaga라는 함수를 만들고 두 액션을 모니터링 해보자.
+
+#### /src/moudules/counter.js
+```js
+import { delay, put, takeEvery, takeLatest } from 'redux-saga/effects';
+...
+export function* counterSaga() {
+    yield takeEvery(INCREASE_ASYNC, increaseSaga)   // 모든 INCREASE_ASYNC 액션 처리
+    yield takeLatest(DECREASE_ASYNC, decreaseSaga)  // 마지막에 디스패치된 DECREASE_ASYNC 액션 처리
+}
+```
+
+이제, 루트 사가를 만들어준다. 프로젝트에 여러개의 사가를 만들게 될텐데, 이를 모두 합쳐서 루트 사가를 만든다.
+
+#### /src/modules/index.js
+```js
+import { all } from 'redux-saga/effects'
+
+export function* rootSaga() {
+    yield all([counterSaga()])  // all은 배열 안에 있는 사가를 동시에 실행시켜준다.
+}
+```
+
+이제 리덕스 스토어에서 redux-saga 미들웨어를 적용한다.
+
+#### index.js
+```js
+const sagaMiddleware = createSagaMiddleware(); 
+
+const store = createStore(
+  rootReducer, 
+  composeWithDevTools(
+    applyMiddleware(
+      ReduxThunk.withExtraArgument({history: customHistory}), 
+      sagaMiddleware,
+      logger
+    )
+  ) //logger는 가장 마지막에 와야한다.
+);
+// console.log(store.getState())
+    
+sagaMiddleware.run(rootSaga)
+```
+
+AppRedux 컴포넌트에서 CounterContainer를 렌더링해본다.
+
+![](../img/redux11.gif)
+
+takeEvery로 처리한 increase는 모든 액션을 처리하기 때문에 버튼을 누른만틈 counter가 증가한다.
+
+takeLatest로 처리한 decrease는 마지막 액션만을 처리하기 때문에 버튼을 아무리 많이 눌러도 마지막 하나의 액션만 처리된다.
+

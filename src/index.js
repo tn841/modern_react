@@ -16,26 +16,30 @@ import reportWebVitals from './reportWebVitals';
 
 import {createStore, applyMiddleware} from 'redux'
 import { Provider } from 'react-redux';
-import rootReducer from './modules'
+import rootReducer, { rootSaga } from './modules'
 import { composeWithDevTools } from 'redux-devtools-extension';
 // import myLogger from './middlewares/myLogger'
 import logger from 'redux-logger'
 import ReduxThunk from 'redux-thunk'
 import { createBrowserHistory } from 'history'
+import createSagaMiddleware from 'redux-saga';
 
 const customHistory = createBrowserHistory()
+const sagaMiddleware = createSagaMiddleware(); 
 
 const store = createStore(
   rootReducer, 
   composeWithDevTools(
     applyMiddleware(
       ReduxThunk.withExtraArgument({history: customHistory}), 
+      sagaMiddleware,
       logger
     )
   ) //logger는 가장 마지막에 와야한다.
 );
 // console.log(store.getState())
-
+    
+sagaMiddleware.run(rootSaga)
 
 
 ReactDOM.render(
