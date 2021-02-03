@@ -599,11 +599,82 @@ state를 변경하려면 기존에 생성했던 asyncUtils에 만든 여러 함�
 - createPromiseThunkById : action creator 함수 생성시 thunk 함수를 만들어주는 함수
 - handleAsyncActionsById : reducer에서 action에 따른 처리를 담당하는 함수
 
-이제부터 비동기 작업과 관련된 action이 어떤 postId를 가르키는지 앟아야 한다. 그렇게 하기 위해서는 앞으로 action.meta 값에 id를 넣어주도록 한다.
+**이제부터 비동기 작업과 관련된 action이 어떤 postId를 가르키는지 알아야 한다. 그렇게 하기 위해서는 앞으로 action.meta 값에 id를 넣어주도록 한다.**
 
 #### /src/lib/asyncUtils.js
+```js
+...
+// 특정 postId를 처리하는 Thunk 생성 함수
+const defaultIdSelector = param => param;
+export const createPromiseThunkById = (
+    type, 
+    promiseCreator, 
+    idSelector=defaultIdSelector
+) => {
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`]
+    return (param) => async (dispatch, getState) => {
+        const id = idSelector(param);
+        dispatch({type, meta: id});
+        try{
+            const payload = await promiseCreator(param)
+            dispatch({type: SUCCESS, payload, meta: id})
+        } catch (e) {
+            dispatch({type: ERROR, error: true, payload: e, meta: id})
+        }
+    }
+}
+...
+// id별로 처리하는 handleAsyncActionsById..
+export const handleAsyncActionsById = (type, key, keepData = false) => {
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`]
+
+    return (state, action) => {
+        const id = action.meta;
+        switch(action.type) {
+            case type:
+                return {
+                    ...state,
+                    [key]: {
+                        ...state[key],
+                        [id]: reducerUtils.loading(
+                            keepData ? state[key][id] && state[key][id].data : null
+                        )
+                    }
+                }
+            case SUCCESS:
+                return {
+                    ...state,
+                    [key]: {
+                        ...state[key],
+                        [id]: reducerUtils.success(action.payload)
+                    }
+                }
+            case ERROR:
+                return {
+                    ...state,
+                    [key] : {
+                        ...state[key],
+                        [id]: reducerUtils.error(action.payload)
+                    }
+                }
+            default:
+                return state
+
+        }
+    }
+}
+```
+
+### /src/modules/posts.js
+```js
+...
+export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById)
 ...
 
+return handleAsyncActionsById(GET_POST, 'post', true)(state, action)
+...
+
+```
 
 기존의 CLEAR_POST 액션은 더이상 필요하지 않다.
 
@@ -611,4 +682,24 @@ state를 변경하려면 기존에 생성했던 asyncUtils에 만든 여러 함�
 
 모두 구현 해보자.
 
-- 해당 ID의 post 데이터가 state에 있으면 API 요청 방지
+- (1)해당 ID의 post 데이터가 state에 있으면 API 요청 방지
+```js
+    useEffect(() => {
+        if( data ) return;
+        dispatch(getPost(postId));
+    }, [dispatch, postId])
+
+    if (loading) return <div>로딩중...</div>;
+```
+- (2)keepData 파라미터를 이용하여 API 요청은 하지만, 로딩중 방지
+```js
+
+    useEffect(() => {
+        // if( data ) return;
+        dispatch(getPost(postId));
+    }, [dispatch, postId])
+
+    if (loading && !data) return <div>로딩중...</div>;
+```
+
+데이터를 완전히 캐싱하고 싶다면 아예 API 요청을 하지 않는 방식을 택하고(1), 데이터가 바뀔 수 있는 가능성이 있다면 API 요청을 하지만 로딩중은 표시하지 않는 형태(2)로 구현한다.

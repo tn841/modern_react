@@ -5,12 +5,12 @@ const sleep = n => new Promise( resolve => setTimeout(resolve, n));
 const posts = [
   {
     id: 1,
-    title: '리덕스 미들웨어를 배워봅시다',
+    title: '리덕스 미들웨어를 배워봅시다!!!',
     body: '리덕스 미들웨어를 직접 만들어보면 이해하기 쉽죠.'
   },
   {
     id: 2,
-    title: 'redux-thunk를 사용해봅시다',
+    title: 'redux-thunk를 사용해봅시다2',
     body: 'redux-thunk를 사용해서 비동기 작업을 처리해봅시다!'
   },
   {

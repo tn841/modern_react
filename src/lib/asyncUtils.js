@@ -28,7 +28,7 @@ export const createPromiseThunkById = (
         const id = idSelector(param);
         dispatch({type, meta: id});
         try{
-            const payload = promiseCreator(param)
+            const payload = await promiseCreator(param)
             dispatch({type: SUCCESS, payload, meta: id})
         } catch (e) {
             dispatch({type: ERROR, error: true, payload: e, meta: id})
@@ -90,8 +90,8 @@ export const handleAsyncActions = (type, key, keepData = false) => {
     }
 }
 
-// id별로 처리하는 handleAsyncAction..
-export const handleAsyncActionById = (type, key, keepData = false) => {
+// id별로 처리하는 handleAsyncActionsById..
+export const handleAsyncActionsById = (type, key, keepData = false) => {
     const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`]
 
     return (state, action) => {
@@ -103,7 +103,9 @@ export const handleAsyncActionById = (type, key, keepData = false) => {
                     [key]: {
                         ...state[key],
                         [id]: reducerUtils.loading(
-                            keepData ? state[key][id] && state[key][id].data : null
+                            keepData 
+                            ? state[key][id] && state[key][id].data 
+                            : null
                         )
                     }
                 }

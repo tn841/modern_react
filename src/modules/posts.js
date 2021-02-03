@@ -4,7 +4,7 @@ import {
     reducerUtils, 
     handleAsyncActions,
     createPromiseThunkById,
-    handleAsyncActionById
+    handleAsyncActionsById
 } from '../lib/asyncUtils'
 
 // 1. action type 정의
@@ -75,12 +75,12 @@ export default function posts(state=initialState, action) {
         case GET_POST:
         case GET_POST_SUCCESS:
         case GET_POST_ERROR:
-            return handleAsyncActionById(GET_POST, 'post')(state, action)
-        case CLEAR_POST:
-            return {
-                ...state,
-                post: reducerUtils.initial()
-            }
+            return handleAsyncActionsById(GET_POST, 'post', true)(state, action)
+        // case CLEAR_POST:
+        //     return {
+        //         ...state,
+        //         post: reducerUtils.initial()
+        //     }
         default:
             return state;
     }
