@@ -23,6 +23,7 @@ import logger from 'redux-logger'
 import ReduxThunk from 'redux-thunk'
 import { createBrowserHistory } from 'history'
 import createSagaMiddleware from 'redux-saga';
+import {getDefaultMiddleware} from '@reduxjs/toolkit'
 
 const customHistory = createBrowserHistory()
 const sagaMiddleware = createSagaMiddleware({
@@ -30,6 +31,8 @@ const sagaMiddleware = createSagaMiddleware({
     history: customHistory
   }
 }); 
+
+console.log(getDefaultMiddleware())
 
 const store = createStore(
   rootReducer, 

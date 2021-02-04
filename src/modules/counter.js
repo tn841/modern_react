@@ -1,4 +1,27 @@
 import { delay, put, takeEvery, takeLatest } from 'redux-saga/effects'
+import {createSlice} from '@reduxjs/toolkit'
+
+const counterSlice = createSlice({
+    name: 'counter',
+    initialState: {
+        number: 0,
+        diff: 1
+    },
+    reducers: {
+        increment: state => {
+            state.number = state.number + state.diff
+        },
+        decrement: state => {
+            state.number = state.number - state.diff
+        },
+        setDiffRTK: (state, action) => {
+            state.diff = action.payload
+        }
+    }
+})
+
+export const { increment, decrement, setDiffRTK } = counterSlice.actions
+export default counterSlice.reducer
 
 // 액션 타입 만들기
 export const INCREASE = 'INCREASE'
@@ -58,24 +81,24 @@ export const initialState = {
 
 
 // 리듀서 작성하기
-export default function counter(state=initialState, action) {
-    switch(action.type) {
-        case INCREASE:
-            return {
-                ...state,
-                number: state.number + state.diff
-            }
-        case DECREASE:
-            return {
-                ...state,
-                number: state.number - state.diff
-            }
-        case SET_DIFF:
-            return {
-                ...state,
-                diff: action.diff
-            }
-        default:
-            return state
-    }
-}
+// export default function counter(state=initialState, action) {
+//     switch(action.type) {
+//         case INCREASE:
+//             return {
+//                 ...state,
+//                 number: state.number + state.diff
+//             }
+//         case DECREASE:
+//             return {
+//                 ...state,
+//                 number: state.number - state.diff
+//             }
+//         case SET_DIFF:
+//             return {
+//                 ...state,
+//                 diff: action.diff
+//             }
+//         default:
+//             return state
+//     }
+// }
