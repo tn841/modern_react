@@ -1133,3 +1133,47 @@ redux-saga의 동작을 다시 정리해보면,
     4. 정의 한 saga함수를 특정 action.type과 매칭하고 합친 postsSaga() 제너레이터 함수 정의
 2. rootSaga 정의 - /src/modules/index.js
 3. react App에 redux-saga 미들웨어 적용 - /src/index.js
+
+## 7-12. saga에서 라우터 연동하기
+thunk에서 router 연동을 위해 미들웨어를 만들때 설정한 소스를 보자.
+```js
+ReduxThunk.withExtraArgument({history: customHistory}), 
+```
+redux-saga도 비슷하다. 미들웨어를 만들때 context를 설정해주면 추후에 saga함수에서 getContext 함수를 통해 조회할 수 있다.
+
+#### /src/index.js
+```js
+const customHistory = createBrowserHistory();
+const sagaMiddleware = createSagaMiddleware({
+  context: {
+    history: customHistory
+  }
+}); // 사가 미들웨어를 만듭니다.
+```
+
+#### /src/modules/posts.js
+```js
+const GO_TO_HOME = 'GO_TO_HOME'
+
+export const goToHome = () => ({type:GO_TO_HOME})
+
+export function* goTohomeSaga() {
+    const history = yield getContext('history')
+    history.push('/')
+}
+
+export function* postsSaga() {
+    yield takeEvery(GET_POSTS, getPostsSaga);
+    yield takeEvery(GET_POST, getPostSaga);
+    yield takeEvery(GO_TO_HOME, goTohomeSaga)
+}
+
+```
+
+홈으로 router 기능이 정상동작하는지 확인 한다.
+
+
+## 7장 정리
+redux-thunk와 redux-saga 미들웨어를 다루는 법을 알아보았다. 프로미스 처리를 하는 경우 어떻게 코드를 깔끔하게 작성할 수 있는지도 함께 배웠다.
+
+프로젝트를 개발할때 무조건 redux + reduxMiddleware를 사용할 필요는 없다. 프로젝트 규모가 커지고, 상태를 전역적으로 관리해야할 때, 그리고 비동기 작업을 자주하는 경우에 리덕스와 리덕스 미들웨어를 잘 활요하면 프로젝트 관리가 쉬워진다.

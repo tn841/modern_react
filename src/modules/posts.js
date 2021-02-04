@@ -8,7 +8,7 @@ import {
     createPromiseSaga,
     createPromiseSagaById
 } from '../lib/asyncUtils'
-import { call, put, putResolve, takeEvery } from 'redux-saga/effects'
+import { getContext, takeEvery } from 'redux-saga/effects'
 
 // 1. action type 정의
 const GET_POSTS = 'GET_POSTS'
@@ -20,6 +20,7 @@ const GET_POST_SUCCESS = 'GET_POST_SUCCESS'
 const GET_POST_ERROR = 'GET_POST_ERROR'
 
 const CLEAR_POST = 'CLEAR_POST'
+const GO_TO_HOME = 'GO_TO_HOME'
 
 
 // 2. action creator 함수 정의
@@ -90,14 +91,23 @@ const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
 //     }
 // }
 
+export const goToHome = () => ({type:GO_TO_HOME})
+
+export function* goTohomeSaga() {
+    const history = yield getContext('history')
+    history.push('/')
+}
+
 export function* postsSaga() {
     yield takeEvery(GET_POSTS, getPostsSaga);
     yield takeEvery(GET_POST, getPostSaga);
+    yield takeEvery(GO_TO_HOME, goTohomeSaga)
 }
 
-export const goToHome = () => (dispatch, getState, {history}) => {
-    history.push('/')
-}
+
+// export const goToHome = () => (dispatch, getState, {history}) => {
+//     history.push('/')
+// }
 
 
 // function getPosts(){ //thunk 함수
