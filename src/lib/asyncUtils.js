@@ -1,4 +1,6 @@
+import { call, put } from "redux-saga/effects";
 
+///////////////// Thunk
 // 내부에 Promise 객체(API 통신)를 사용하는 Thunk 함수를 생성해주는 함수정의
 // 호출 형태 : createPromiseThunk(GET_POSTS, postAPI.getPosts)
 export const createPromiseThunk = (type, promiseCreator) => {
@@ -35,6 +37,50 @@ export const createPromiseThunkById = (
         }
     }
 }
+
+
+/////////////////// SAGA
+/* 
+API를 요청하는 saga함수에서 반복되는 로직은,
+1. call()로 API요청을 보내고 반환을 기다리기
+2. 반환된 데이터로 SUCCESS action put
+3. 에러 발생 시 ERROR action put
+*/
+
+export function createPromiseSaga(type, promiseCreator) {
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`]
+    
+    return function* (action){
+        try{
+            const res = yield call(promiseCreator, action.payload)
+            console.log(res)
+            yield put({
+                type: SUCCESS,
+                payload : res
+            })
+        } catch (e) {
+            yield put({
+                type: ERROR,
+                error: true,
+                payload: e
+            })
+        }
+    }
+}
+
+export const createPromiseSagaById = (type, promiseCreator) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return function* saga(action) {
+    const id = action.meta;
+    try {
+      const payload = yield call(promiseCreator, action.payload);
+      yield put({ type: SUCCESS, payload, meta: id });
+    } catch (e) {
+      yield put({ type: ERROR, error: e, meta: id });
+    }
+  };
+};
+
 
 
 

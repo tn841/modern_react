@@ -4,8 +4,11 @@ import {
     reducerUtils, 
     handleAsyncActions,
     createPromiseThunkById,
-    handleAsyncActionsById
+    handleAsyncActionsById,
+    createPromiseSaga,
+    createPromiseSagaById
 } from '../lib/asyncUtils'
+import { call, put, putResolve, takeEvery } from 'redux-saga/effects'
 
 // 1. action type 정의
 const GET_POSTS = 'GET_POSTS'
@@ -32,13 +35,70 @@ action creator를 정의하는 단계이다.
 있게 된다. 따라서, 이 단계에서는  action creator대신 thunk()함수를 정의할것이다.
 thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는다.
 
+
++++ redux-saga 미들웨어를 사용할경우
+: action객체를 반환하는 평범한 action creator를 정의한다.
+: 순수 action객체를 반환하는 제너레이터 함수(사가함수)를 정의한다. 여기서 비동기 작업들을 진행한다.
+: 사가함수를 특정 action과 매핑? 하며 rootSaga에 등록하기 위해 합쳐준다.
+
  */
-export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts)
-export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById)
-export const clearPost = () => ({type:CLEAR_POST})
+// export const getPosts = createPromiseThunk(GET_POSTS, postsAPI.getPosts)
+// export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById)
+// export const clearPost = () => ({type:CLEAR_POST})
+
+export const getPosts = () => ({type: GET_POSTS})
+export const getPost = id => ({type: GET_POST, payload: id, meta: id}) //payload는 파라미터 용도, meta는 리듀서에서 id를 알기 위해
+
+const getPostsSaga = createPromiseSaga(GET_POSTS, postsAPI.getPosts);
+const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
+
+// function* getPostsSaga() {
+//     try{
+//         // console.log('getPostsSaga','before API call')
+//         const posts = yield call(postsAPI.getPosts);
+//         // redux-saga의 call 함수는 특정함수를 호출하고 결과가 반환될때까지 기다린다.
+//         yield put({
+//             type: GET_POSTS_SUCCESS,
+//             payload: posts
+//         })
+//         // console.log('getPostsSaga','after API call')
+//     } catch (e) {
+//         yield put({
+//             type: GET_POSTS_ERROR,
+//             error: true,
+//             payload: e
+//           });
+//     }
+// }
+
+// function* getPostSaga(action) {
+//     const param = action.payload
+//     const id = action.meta
+//     try{
+//         const post = yield call(postsAPI.getPostById, param)
+//         yield put({
+//             type: GET_POST_SUCCESS,
+//             payload: post,
+//             meta: id
+//         })
+//     } catch (e) {
+//         yield put({
+//             type: GET_POST_ERROR,
+//             payload: e,
+//             meta: id
+//         })
+//     }
+// }
+
+export function* postsSaga() {
+    yield takeEvery(GET_POSTS, getPostsSaga);
+    yield takeEvery(GET_POST, getPostSaga);
+}
+
 export const goToHome = () => (dispatch, getState, {history}) => {
     history.push('/')
 }
+
 
 // function getPosts(){ //thunk 함수
 //     return async (dispatch, getState) => {

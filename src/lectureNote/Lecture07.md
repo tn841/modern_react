@@ -1010,5 +1010,126 @@ AppRedux 컴포넌트에서 CounterContainer를 렌더링해본다.
 
 takeEvery로 처리한 increase는 모든 액션을 처리하기 때문에 버튼을 누른만틈 counter가 증가한다.
 
-takeLatest로 처리한 decrease는 마지막 액션만을 처리하기 때문에 버튼을 아무리 많이 눌러도 마지막 하나의 액션만 처리된다.
+takeLatest로 처리한 decrease는 마지막 액션만을 처리하기 때문에 버튼을 아무리 많이 눌러도 마지막 하나의 액션만 처리된다. 
 
+> 더블클릭 방지에 효과적으로 보인다.
+
+
+## 7-11. redux-saga로 프로미스 다루기
+이전에 redux-thunk를 배울때는 thunk 함수를 만들어서 이 함수가 dispatch될 때 비동기 작업을 처리하고, 액션 객체를 dispatch하거나, state를 조회할 수 있었다.
+
+thunk함수를 다시 살펴보자.
+```js
+export const getPosts = () => async (dispatch, getStatet) => {
+    dispatch({type: GET_POSTS})
+    try{
+        const res = await postsAPI.getPosts();
+        dispatch({type: GET_POSTS_SUCCESS, posts: res.data})
+    } catch (e) {
+        dispatch({type: GET_POSTS_ERROR, error: e})
+    }
+}
+```
+
+redux-thunk에서는 위와 같이 비동기 함수를 만들어서 해당 함수로 API 요청작업을 진행하고 적절히 action을 dispatch 하고 있다. redux-saga는 비동기 작업을 처리할때 redux-thunk와는 다른방식으로 처리한다.
+
+redux-saga에서는 특정 액션을 모니터링하도록 하고, 해당 액션이 dispatch되면 이에 따라 제너레이터 함수를 실행하여 비동기 작업을 처리한 후 action을 dispatch한다.
+
+기존에 redux-thunk로 구현했던 posts 모듈을 redux-saga로 구현해보자.
+
+#### /src/modules/posts.js
+```js
+// 1) action객체를 반환하는 평범한 action creator를 정의한다.
+// 2) 순수 action객체를 반환하는 제너레이터 함수(사가함수)를 정의한다. 여기서 비동기 작업들을 진행한다.
+// 3) 사가함수를 특정 action과 매핑? 하며 rootSaga에 등록하기 위해 합쳐준다.v
+```
+
+### /src/modules/index.js
+```js
+export function* rootSaga() {
+    yield all([counterSaga(), postsSaga()])  // all은 배열 안에 있는 사가를 동시에 실행시켜준다.
+}
+```
+
+
+
+### 프로미스를 처리하는 사가함수 리팩토링
+우리가 위에서 만든 API 요청 사가함수 형태는 굉장히 자주쓰이는 형태이다. 위와 같이 간단한 API요청 사가함수는 반복되는 로직을 함수화하여 재사용하면 훨씬 깔끔하게 코드를 작성할 수 있고 생산성도 높아진다.
+
+redux-thunk를 배울때 리팩토링했던 createPromiseThunk, createPromiseThunkById 유틸 함수처럼 createPromiseSaga와 createPromiseSagaById 유틸 함수를 작성해보자.
+
+handleAsyncAction 유틸함수는 변동사항이 없다.
+
+#### /src/lib/asyncUtils.js
+```js
+/* 
+API를 요청하는 saga함수에서 반복되는 로직은,
+1. call()로 API요청을 보내고 반환을 기다리기
+2. 반환된 데이터로 SUCCESS action put
+3. 에러 발생 시 ERROR action put
+*/
+
+export function createPromiseSaga(type, promiseCreator) {
+    const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`]
+    
+    return function* (action){
+        try{
+            const res = yield call(promiseCreator, action.payload)
+            yield put({
+                type: SUCCESS,
+                payload : res
+            })
+        } catch (e) {
+            yield put({
+                type: ERROR,
+                error: true,
+                payload: e
+            })
+        }
+    }
+}
+
+export const createPromiseSagaById = (type, promiseCreator) => {
+  const [SUCCESS, ERROR] = [`${type}_SUCCESS`, `${type}_ERROR`];
+  return function* saga(action) {
+    const id = action.meta;
+    try {
+      const payload = yield call(promiseCreator, action.payload);
+      yield put({ type: SUCCESS, payload, meta: id });
+    } catch (e) {
+      yield put({ type: ERROR, error: e, meta: id });
+    }
+  };
+};
+```
+
+이제 사가를 통해 비동기 작업을 처리할 때, API함수의 인자는 action파라미터로부터 참조한다. action 객체에서 사용할 수 있는 인자의 이름은 payload로 통일해준다. 그리고 특정 id를 위한 비동기작업을 처리하는 경우에는 id값을 action.meta에서 참조하도록 하였다.
+
+유틸함수를 posts 모듈에 적용해주자.
+
+#### /src/modules/posts.js
+```js
+export const getPosts = () => ({type: GET_POSTS})
+export const getPost = id => ({type: GET_POST, payload: id, meta: id}) //payload는 파라미터 용도, meta는 리듀서에서 id를 알기 위해
+
+const getPostsSaga = createPromiseSaga(GET_POSTS, postsAPI.getPosts);
+const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
+
+export function* postsSaga() {
+    yield takeEvery(GET_POSTS, getPostsSaga);
+    yield takeEvery(GET_POST, getPostSaga);
+}
+```
+
+훨씬 코드가 깔끔해 졌다.
+
+redux-saga의 동작을 다시 정리해보면, 
+
+1. redux module 작성 - /src/modules/posts.js
+    1. action type정의
+    2. action creator 정의
+    3. saga 함수 정의
+        - redux-saga가 action을 모니터링하다가 특정 action을 만나면 실행할 비동기 로직 및 원하는 복잡한 로직을 구현한 함수
+    4. 정의 한 saga함수를 특정 action.type과 매칭하고 합친 postsSaga() 제너레이터 함수 정의
+2. rootSaga 정의 - /src/modules/index.js
+3. react App에 redux-saga 미들웨어 적용 - /src/index.js
