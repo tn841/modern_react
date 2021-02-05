@@ -9,17 +9,111 @@ import {
     createPromiseSagaById
 } from '../lib/asyncUtils'
 import { getContext, takeEvery } from 'redux-saga/effects'
+import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
+
+////////////////////////////////////////////////////////
+
+export const getPosts = createAsyncThunk(
+    'posts/GET_POSTS',
+    async (value, thunkAPI) => {
+        return await postsAPI.getPosts()
+    }
+)
+
+export const getPost = createAsyncThunk(
+    'posts/GET_POST',
+    async (value, thunkAPI) => {
+        return await postsAPI.getPostById(value)
+    }
+)
+
+const postsSlice = createSlice({
+    name:'posts',
+    initialState: {
+        posts:reducerUtils.initial(),
+        post:{}
+    },
+    reducers : {
+      
+    },
+    extraReducers : {
+        [getPosts.pending] : (state, action) => {
+            console.log(state.posts.data)
+            if(!state.posts.data){
+                state.posts.loading = true;
+                state.posts.data = null;
+                state.posts.error = null
+            } else {
+                state.posts.loading = false;
+            }
+            
+        },
+        [getPosts.fulfilled] : (state, action) => {            
+            state.posts.data = action.payload
+            state.posts.loading = false
+            state.posts.error = null
+        },
+        [getPosts.rejected] : (state, action) => {
+            state.posts.data = null
+            state.posts.loading = false
+            state.posts.error = action.payload
+        },
+
+
+        [getPost.pending] : (state, action) => {
+            const postId = action.meta.arg;
+            if(!state.post[postId]){
+                console.log('getPost pending first')
+                state.post[postId] = {}
+
+                state.post[postId].loading = true;
+                state.post[postId].data = null;
+                state.post[postId].error = null;
+            } else {
+                console.log('getPost pending after')
+                state.post[postId].loading = false;
+            }
+            
+        },
+        [getPost.fulfilled] : (state, action) => {
+            const postId = action.meta.arg;
+            if(!state.post[postId]){
+                state.post[postId] = {}
+            }
+            state.post[postId].loading = false;
+            state.post[postId].data = action.payload;
+            state.post[postId].error = null;
+        },
+        [getPost.rejected] : (state, action) => {
+            const postId = action.meta.arg;
+            if(!state.post[postId]){
+                state.post[postId] = {}
+            }
+            state.post[postId].loading = false;
+            state.post[postId].data = null;
+            state.post[postId].error = action.payload;
+        }
+    }
+})
+
+// export const { GET_POSTS, GET_POST } = postsSlice.actions
+export const postsRTKReducer = postsSlice.reducer
+
+
+
+
+////////////////////////////////////////////////////////
 
 // 1. action type 정의
-const GET_POSTS = 'GET_POSTS'
-const GET_POSTS_SUCCESS = 'GET_POSTS_SUCCESS'
-const GET_POSTS_ERROR = 'GET_POSTS_ERROR'
+// const GET_POSTS = 'GET_POSTS'
+// const GET_POSTS_SUCCESS = 'GET_POSTS_SUCCESS'
+// const GET_POSTS_ERROR = 'GET_POSTS_ERROR'
 
-const GET_POST = 'GET_POST'
-const GET_POST_SUCCESS = 'GET_POST_SUCCESS'
-const GET_POST_ERROR = 'GET_POST_ERROR'
+// const GET_POST = 'GET_POST'
+// const GET_POST_SUCCESS = 'GET_POST_SUCCESS'
+// const GET_POST_ERROR = 'GET_POST_ERROR'
 
-const CLEAR_POST = 'CLEAR_POST'
+// const CLEAR_POST = 'CLEAR_POST'
 const GO_TO_HOME = 'GO_TO_HOME'
 
 
@@ -47,11 +141,11 @@ thunk()함수란, 인자로 (dispatch, getState)를 받는 함수를 일컫는�
 // export const getPost = createPromiseThunkById(GET_POST, postsAPI.getPostById)
 // export const clearPost = () => ({type:CLEAR_POST})
 
-export const getPosts = () => ({type: GET_POSTS})
-export const getPost = id => ({type: GET_POST, payload: id, meta: id}) //payload는 파라미터 용도, meta는 리듀서에서 id를 알기 위해
+// export const getPosts = () => ({type: GET_POSTS})
+// export const getPost = id => ({type: GET_POST, payload: id, meta: id}) //payload는 파라미터 용도, meta는 리듀서에서 id를 알기 위해
 
-const getPostsSaga = createPromiseSaga(GET_POSTS, postsAPI.getPosts);
-const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
+// const getPostsSaga = createPromiseSaga(GET_POSTS, postsAPI.getPosts);
+// const getPostSaga = createPromiseSagaById(GET_POST, postsAPI.getPostById);
 
 // function* getPostsSaga() {
 //     try{
@@ -99,8 +193,8 @@ export function* goTohomeSaga() {
 }
 
 export function* postsSaga() {
-    yield takeEvery(GET_POSTS, getPostsSaga);
-    yield takeEvery(GET_POST, getPostSaga);
+    // yield takeEvery(GET_POSTS, getPostsSaga);
+    // yield takeEvery(GET_POST, getPostSaga);
     yield takeEvery(GO_TO_HOME, goTohomeSaga)
 }
 
@@ -138,25 +232,25 @@ const initialState = {
     post: {}
 }
 
-// 4. reducer 함수
-export default function posts(state=initialState, action) {
-    switch(action.type) {
-        case GET_POSTS:
-        case GET_POSTS_SUCCESS:
-        case GET_POSTS_ERROR:
-            return handleAsyncActions(GET_POSTS, 'posts', true)(state, action)
-        case GET_POST:
-        case GET_POST_SUCCESS:
-        case GET_POST_ERROR:
-            return handleAsyncActionsById(GET_POST, 'post', true)(state, action)
-        // case CLEAR_POST:
-        //     return {
-        //         ...state,
-        //         post: reducerUtils.initial()
-        //     }
-        default:
-            return state;
-    }
-}
+// // 4. reducer 함수
+// export default function posts(state=initialState, action) {
+//     switch(action.type) {
+//         case GET_POSTS:
+//         case GET_POSTS_SUCCESS:
+//         case GET_POSTS_ERROR:
+//             return handleAsyncActions(GET_POSTS, 'posts', true)(state, action)
+//         case GET_POST:
+//         case GET_POST_SUCCESS:
+//         case GET_POST_ERROR:
+//             return handleAsyncActionsById(GET_POST, 'post', true)(state, action)
+//         // case CLEAR_POST:
+//         //     return {
+//         //         ...state,
+//         //         post: reducerUtils.initial()
+//         //     }
+//         default:
+//             return state;
+//     }
+// }
 
 

@@ -1,5 +1,5 @@
 import { delay, put, takeEvery, takeLatest } from 'redux-saga/effects'
-import {createSlice} from '@reduxjs/toolkit'
+import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 
 const counterSlice = createSlice({
     name: 'counter',
@@ -24,8 +24,8 @@ export const { increment, decrement, setDiffRTK } = counterSlice.actions
 export default counterSlice.reducer
 
 // 액션 타입 만들기
-export const INCREASE = 'INCREASE'
-export const DECREASE = 'DECREASE'
+export const INCREASE = 'counter/increment'
+export const DECREASE = 'counter/decrement'
 export const SET_DIFF = 'SET_DIFF'
 const INCREASE_ASYNC = 'INCREASE_ASYNC';
 const DECREASE_ASYNC = 'DECREASE_ASYNC';
@@ -43,18 +43,23 @@ export const setDiff = (diff) => {
 }
 
 //thunk 만들기
-// export const increaseAsync = () => (dispatch, getState) => {
-//     setTimeout(() => {dispatch(increase())}, 1000)
-// }
-// export const decreaseAsync = () => (dispatch, getState) => {
-//     setTimeout(() => {dispatch(decrease())}, 1000)
-// }
-export const increaseAsync = () => {
-    return {type:INCREASE_ASYNC}
+export const increaseAsync = () => (dispatch, getState) => {
+    return setTimeout(() => {dispatch(increase())}, 1000)
 }
-export const decreaseAsync = () => {
-    return {type:DECREASE_ASYNC}
+export const decreaseAsync = () => (dispatch, getState) => {
+    setTimeout(() => {dispatch(decrease())}, 1000)
 }
+// export const increaseAsync = () => {
+//     return {type:INCREASE_ASYNC}
+// }
+// export const decreaseAsync = () => {
+//     return {type:DECREASE_ASYNC}
+// }
+export const incrementAsync =  createAsyncThunk(increment, async (value) => {
+    return await new Promise( resolve => setTimeout(resolve, 1000));
+    
+    // return await setTimeout(() => {dispatch(increment)}, 1000)
+})
 
 // 7-10. redux-saga의 제너레이터 함수(saga) 만들기
 function* increaseSaga() {
@@ -68,8 +73,8 @@ function* decreaseSaga(){
 }
 
 export function* counterSaga() {
-    yield takeEvery(INCREASE_ASYNC, increaseSaga)   // 모든 INCREASE_ASYNC 액션 처리
-    yield takeLatest(DECREASE_ASYNC, decreaseSaga)  // 마지막에 디스패치된 DECREASE_ASYNC 액션 처리
+    // yield takeEvery(INCREASE_ASYNC, increaseSaga)   // 모든 INCREASE_ASYNC 액션 처리
+    // yield takeLatest(DECREASE_ASYNC, decreaseSaga)  // 마지막에 디스패치된 DECREASE_ASYNC 액션 처리
 }
 
 

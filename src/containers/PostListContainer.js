@@ -4,11 +4,14 @@ import {useSelector, useDispatch} from 'react-redux'
 import {getPosts, clearPost} from '../modules/posts'
 
 function PostListContainer(){
-    const {data, loading, error} = useSelector(state => (state.posts.posts))
+    // const state = useSelector(state => state)
+    const {data, loading, error} = useSelector(state => (state.postsRTKReducer.posts))
+    // const {data, loading, error} = {data:null, loading:false, error:null}
     const dispatch = useDispatch();
 
     useEffect(() => {
         dispatch(getPosts())
+
         return () => {
             
         }

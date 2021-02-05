@@ -5,7 +5,7 @@ import { getPost, goToHome } from '../modules/posts'
 
 function PostContainer({postId}){
     const {data, loading, error} = useSelector(
-        state => state.posts.post[postId]
+        state => state.postsRTKReducer.post[postId]
     ) || {
         loading: false,
         data: null,
