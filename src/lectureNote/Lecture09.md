@@ -1,9 +1,9 @@
 ## 9장. 더 배우기 
-> 개인적으로 학습이 필요한 내용을 정리한ㄴ다.
+> 개인적으로 학습이 필요한 내용을 정리한다.
 
 - redux toolkit : https://redux-toolkit.js.org/
-- TypeScript
 - react 인증 구현 : https://www.daleseo.com/react-router-authentication/
+- TypeScript
 
 
 ### 9-1. Redux Toolkit
@@ -112,3 +112,5 @@ getPosts가 dispatch되면, thunk는 다음과 같이 동작한다.
 
 #### /src/modules/posts.js
 - createSlice, createAsyncThunk 로 posts 모듈을 구현해본다.
+
+
