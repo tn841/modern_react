@@ -113,4 +113,4 @@ getPosts가 dispatch되면, thunk는 다음과 같이 동작한다.
 #### /src/modules/posts.js
 - createSlice, createAsyncThunk 로 posts 모듈을 구현해본다.
 
-
+.
