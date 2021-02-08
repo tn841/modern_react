@@ -262,3 +262,58 @@ class Queue<T> {
 const queue = new Queue<number>();
 queue.enqueue(0);
 ```
+
+## 8-2. 리액트 컴포넌트 타입스크립트로 작성하기
+
+### 프로젝트 생성
+우선, 타입스크립트를 사용하는 리액트 프로젝트를 만들어보자.
+```bash
+$ npx create-react-app ts-react-tutorial --typescript
+```
+
+ts-react-tutorial 프로젝트의 src 디렉토리안에 App.tsx 파일이 있다. 타입스크립트를 사용하는 리액트 컴포넌트는 *.tsx 확장자를 사용한다.
+
+#### App.tsx
+```js
+import React from 'react';
+import logo from './logo.svg';
+import './App.css';
+
+const App: React.FC = () => {
+  return (
+    <div></div>
+  )
+}
+
+export default App;
+```
+App컴포넌트는 React.FC 라는 것을 사용하여 컴포넌트의 type을 지정했다. 이렇게 타입을 지정하는 것이 좋을 수 도 있고 나쁠 수도 있다.
+
+새로운 컴포넌트를 선언하면서 React.FC를 사용하는 것과 사용하지 않는 것이 어떤 차이가 있는지 알아보도록 한다.
+
+
+### 새로운 컴포넌트 만들기
+Greetings 라는 새로운 컴포넌트를 작성해보자.
+
+#### src/Greetings.tsx
+```js
+import React from 'react';
+
+type GreetingProps = {
+  name: string
+}
+
+const Greetings: React.FC<GreetingsProps> = ({name}) => (
+  <div> Hello, {name} </div>
+)
+
+export default Greetings;
+```
+React.FC를 사용할 때 props의 타입을 Generics로 넣어서 사용한다. 이렇게 React.FC를 사용해서 얻을 수 있는 이점을 두가지가 있다.
+
+첫번째는, props에 기본적으로 children이 들어가 있다는 점이다.
+
+> React.FC는 사용하지 않는게 좋은것 같다.
+
+아무튼 리액트 컴포넌트의 props를 type으로 정의하면, 해당 컴포넌트를 사용할 때 필수로 전달해야하는 props 값, 함수들을 IDE 기능을 통해 확인하여 쉽게 개발할 수 있다.
+
