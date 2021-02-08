@@ -1,12 +1,19 @@
 import React from 'react';
-import Greeting from './Greeting'
+import Counter from './components/Counter'
+import MyForm from './components/MyForm'
 
 function App() {
-  const onClick = (name: String) => {
-    console.log(`${name} say Hello`)
-  }
+
   return (
-    <Greeting name="Hello" onClick={onClick} />
+    <div>
+      <Counter />
+      <MyForm onSubmit={(form: {
+          name: string;
+          description: string;
+      }) => {
+        console.log(form)
+      }}/>
+    </div>
   );
 }
 

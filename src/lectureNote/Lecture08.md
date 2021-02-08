@@ -317,3 +317,104 @@ React.FC를 사용할 때 props의 타입을 Generics로 넣어서 사용한다.
 
 아무튼 리액트 컴포넌트의 props를 type으로 정의하면, 해당 컴포넌트를 사용할 때 필수로 전달해야하는 props 값, 함수들을 IDE 기능을 통해 확인하여 쉽게 개발할 수 있다.
 
+## 8-3. 타입스크립트로 리액트 상태관리하기
+
+타입스크립트를 사용하는 리액트 컴포넌트에서 useState와 useReducer를 사용하여 컴포넌트의 상태를 관맇나느 방법을 알아본다.
+
+### 카운터 만들어보기
+고로 useState를 사용 할 때 Generics 를 사용하지 않아도 알아서 타입을 유추하기 때문에 생략해도 상관없다.
+
+하지만, state가 null일 수도 있을 경우에는 Generics를 사용하면 좋다.
+
+```js
+type Info = {
+  name: string;
+  description: string
+}
+const [info, setInfo] = useState<Info | null>(null)
+```
+
+### 인풋상태 관리하기
+인풋은 이벤트를 다뤄야하기 때문에 type지정을 어떻게할지 헷갈릴수 있다.
+
+```js
+return (
+        <form onSubmit={handleSubmit} >
+            <input name="name" value={name} onChange={handleChange} />
+            <input name="description" value={description} onChange={handleChange} />
+            <button type="submit">등록</button>
+        </form>
+    )
+```
+input의 onSubmit과 onChange의 e객체의 타입이 무엇인지 알고싶다면, 해당 속성에 마우스를 올려본다. 그러면 어떤 타입을 지정해야하는지 알려준다.
+```js
+React.FormEvent<HTMLFormElement>
+React.ChangeEvent<HTMLInputElement>
+```
+다음과 같이 MyFormProps type을 정의하고 App.tsx에서 자동완성을 활용하여 사용해보자.
+
+```js
+type MyFormProps = {
+    onSubmit: (form: {name: string; description: string}) => void
+}
+
+function MyForm({onSubmit}: MyFormProps) {
+    const [input, setInput] = useState({
+        name: '',
+        description: ''
+    })
+    const {name, description} = input
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        // console.log("submit : ", name, description)
+        onSubmit(input)
+        setInput({
+            name: '',
+            description: ''
+        })
+    }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target
+        // console.log(name, value)
+        setInput({
+            ...input,
+            [name]: value
+        })
+    }
+
+    return (
+        <form onSubmit={handleSubmit} >
+            <input name="name" value={name} onChange={handleChange} />
+            <input name="description" value={description} onChange={handleChange} />
+            <button type="submit">등록</button>
+        </form>
+    )
+}
+
+export default MyForm
+```
+
+```js
+import React from 'react';
+import Counter from './components/Counter'
+import MyForm from './components/MyForm'
+
+function App() {
+
+  return (
+    <div>
+      <Counter />
+      <MyForm onSubmit={(form: {
+          name: string;
+          description: string;
+      }) => {
+        console.log(form)
+      }}/>
+    </div>
+  );
+}
+
+export default App;
+
+```
