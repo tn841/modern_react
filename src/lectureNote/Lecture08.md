@@ -418,3 +418,149 @@ function App() {
 export default App;
 
 ```
+
+### useReducer 사용하기
+타입스크립트와 useReducer를 사용해보자.
+
+```js
+type Action = {type: 'INCREASE'} | {type: 'DECREASE'};
+
+const reducer = (state: number, action: Action) => {
+    switch(action.type) {
+        case 'INCREASE':
+            return state + 1
+        case 'DECREASE':
+            return state - 1
+        default:
+            return state
+    }
+}
+...
+```
+타입스크립트로 Action type을 명시해주면 dispatch할 때 자동완성이 지원된다.
+
+
+## 8-4. TypeScript와 ContextAPI 활용하기
+state를 위한 context를 만들고 dispatch를 위한 context를 생성할 것이다.
+
+#### src/components/SampleContext.tsx
+```js
+import React, {useReducer, useContext, createContext, Dispatch} from 'react'
+
+type Color = 'red' | 'green' | 'blue';
+
+type State = {
+    count: number;
+    text: string;
+    color: Color;
+    isGood: boolean
+}
+
+type Action = 
+    | {type: 'SET_COUNT'; count:number}
+    | {type: 'SET_TEXT'; text:string}
+    | {type: 'SET_COLOR'; color:Color}
+    | {type: 'TOGGLE_GOOD';}
+
+type SampleDispatch = Dispatch<Action>;
+
+const SampleStateContext = createContext<State|null>(null)
+const SampleDispatchContext = createContext<SampleDispatch|null>(null)
+
+const reducer = (state: State, action: Action) => {
+    switch(action.type) {
+        case 'SET_COUNT':
+            return {
+                ...state,
+                count: action.count
+            }
+        case 'SET_COLOR':
+            return {
+                ...state,
+                color: action.color
+            }
+        case 'SET_TEXT':
+            return {
+                ...state,
+                text: action.text
+            }
+        case 'TOGGLE_GOOD':
+            return {
+                ...state,
+                isGood: !state.isGood
+            }
+        default :
+            return state
+    }
+}
+
+export function SampleProvider({children}: {children: React.ReactNode}) {
+    const [state, dispatch] = useReducer(reducer, {
+        count: 0,
+        text: 'Hello',
+        color: 'red',
+        isGood: true
+    });
+
+    return (
+        <SampleStateContext.Provider value={state}>
+            <SampleDispatchContext.Provider value={dispatch}>
+                {children}
+            </SampleDispatchContext.Provider>
+        </SampleStateContext.Provider>
+    )
+}
+
+export function useSampleState() {
+    const state = useContext(SampleStateContext);
+    if (!state) throw new Error('Cannot find SampleProvider'); // 유효하지 않을땐 에러를 발생
+    return state;
+  }
+  
+  export function useSampleDispatch() {
+    const dispatch = useContext(SampleDispatchContext);
+    if (!dispatch) throw new Error('Cannot find SampleProvider'); // 유효하지 않을땐 에러를 발생
+    return dispatch;
+  }
+```
+
+#### /src/components/ReducerSample.tsx
+```js
+import React from 'react'
+import {useSampleDispatch, useSampleState} from './SampleContext'
+
+function ReducerSample() {
+    const state = useSampleState()
+    const dispatch = useSampleDispatch()
+
+    const setCount = () => dispatch({ type: 'SET_COUNT', count: 5 }); // count 를 넣지 않으면 에러발생
+    const setText = () => dispatch({ type: 'SET_TEXT', text: 'bye' }); // text 를 넣지 않으면 에러 발생
+    const setColor = () => dispatch({ type: 'SET_COLOR', color: 'green' }); // orange 를 넣지 않으면 에러 발생
+    const toggleGood = () => dispatch({ type: 'TOGGLE_GOOD' });
+
+    return (
+        <div>
+            <p>
+                <code>count: </code> {state.count}
+            </p>
+            <p>
+                <code>text: </code> {state.text}
+            </p>
+            <p>
+                <code>color: </code> {state.color}
+            </p>
+            <p>
+                <code>isGood: </code> {state.isGood ? 'true' : 'false'}
+            </p>
+            <div>
+                <button onClick={setCount}>SET_COUNT</button>
+                <button onClick={setText}>SET_TEXT</button>
+                <button onClick={setColor}>SET_COLOR</button>
+                <button onClick={toggleGood}>TOGGLE_GOOD</button>
+            </div>
+        </div>
+    )
+}
+
+export default ReducerSample
+```

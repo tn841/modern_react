@@ -1,11 +1,14 @@
 import React from 'react';
 import Counter from './components/Counter'
 import MyForm from './components/MyForm'
+import CounterUR from './components/CounterUR'
+import ReducerSample from './components/ReducerSample'
+import {SampleProvider} from './components/SampleContext'
 
 function App() {
 
   return (
-    <div>
+    <SampleProvider>
       <Counter />
       <MyForm onSubmit={(form: {
           name: string;
@@ -13,7 +16,10 @@ function App() {
       }) => {
         console.log(form)
       }}/>
-    </div>
+      <CounterUR />
+      <hr/>
+      <ReducerSample />
+    </SampleProvider>
   );
 }
 
