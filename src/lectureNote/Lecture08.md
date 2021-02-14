@@ -575,3 +575,25 @@ redux는 타입스크립트를 지원하지만, react-redux는 지원하지 않�
 라이브러리에서 타입스크립트를 공식적으로 지원하는지 확인할때는, index.d.ts 파일이 있는지 확인해보면된다.
 
 ### Counter 리덕스 모듈 작성
+- modules/counter.tsx 
+  - redux-toolkit의 createSlice를 사용하여 action과 reducer를 정의한다.
+  - state의 type을 정의한다.
+  - action.payload는 rtk에서 제공하는 PayloadAction type을 사용
+- modules/index.tsx
+  - rootReducer를 export한다.
+  - rootReducer의 반환값을 유추해준다. 추후 이 타입을 컨테이너 컴포넌트에서 불러와서 사용해야 하므로 export해준다.
+  ```js
+  export type RootState = ReturnType<typeof rootReducer>;
+  ```
+- components/Counter.tsx
+  - Counter 컴포넌트를 정의한다.
+  - useSeletor를 사용할 때, modules/index.tsx에서 export한 RootState type을 사용한다.
+  ```js
+  // state 타입을 RootState로 지정해야한다.
+    const {count, diff} =  useSelector( (state:RootState) => state.counter)
+  ```
+- index.tsx
+  - redux store 객체 생성 
+  - react-redux의 provider 컴포넌트를 통해 store 주입
+- App.tsx
+  - Counter컴포넌트 출력
