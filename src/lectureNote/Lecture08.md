@@ -600,5 +600,43 @@ redux는 타입스크립트를 지원하지만, react-redux는 지원하지 않�
 
 
 ### TodoList 구현하기
-a
-a
+
+
+
+## 8-6. 타입스크립트에서 리덕스 미들웨어 사용하기
+
+### redux-thunk 적용하기
+- redux-thunk 설치
+- axios 설치
+- store에 middleware 적용 - redux-toolkit의 configureStore는 기본적으로 redux-thunk mw를 갖고있다.
+
+### github 사용자 정보 가져오기
+- 사용할 API URL: https://api.github.com/users/:username
+- 결과물 : 
+```json
+{
+    "login": "velopert",
+    "id": 17202261,
+    "node_id": "MDQ6VXNlcjE3MjAyMjYx",
+    "avatar_url": "https://avatars0.githubusercontent.com/u/17202261?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/velopert",
+    "html_url": "https://github.com/velopert",
+    "followers_url": "https://api.github.com/users/velopert/followers",
+    "following_url": "https://api.github.com/users/velopert/following{/other_user}",
+    "gists_url": "https://api.github.com/users/velopert/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/velopert/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/velopert/subscriptions",
+    "organizations_url": "https://api.github.com/users/velopert/orgs",
+    "repos_url": "https://api.github.com/users/velopert/repos",
+    "events_url": "https://api.github.com/users/velopert/events{/privacy}",
+    "received_events_url": "https://api.github.com/
+    ...
+```
+- 응답 데이터에 대한 type을 준비해야한다. 직접 하나하나 type을 정의하기가 번거로우면 [Quicktype](https://app.quicktype.io/?l=ts) 사이트를 이용해보자. VScode Extension도 있다.
+- /src/api/github.ts 파일 작성 : axios로 API 요청을 보내는 비동기 함수 정의, 리턴 데이터에 대한 interface정의
+- /srec/modules/github.ts redux 모듈 작성
+  - createSlice
+  - thunk 함수 작성
+  - 리듀서 함수 작성
+  - rootReducer에 등록
