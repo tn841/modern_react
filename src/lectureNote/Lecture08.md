@@ -645,3 +645,6 @@ redux는 타입스크립트를 지원하지만, react-redux는 지원하지 않�
 
 // redux-tookit & redux-thunk 사용 예제
 // https://kyounghwan01.github.io/blog/React/redux/redux-toolkit/#%EC%A2%85%ED%95%A9-%EC%98%88%EC%A0%9C
+
+// 밴치마킹할 블로그
+// https://kyounghwan01.github.io/blog/
