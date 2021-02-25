@@ -658,3 +658,6 @@ redux는 타입스크립트를 지원하지만, react-redux는 지원하지 않�
 20210224
 - jquery와 react의 차이
 - https://medium.com/@RianCommunity/react%EC%9D%98-%ED%83%84%EC%83%9D%EB%B0%B0%EA%B2%BD%EA%B3%BC-%ED%8A%B9%EC%A7%95-4190d47a28f
+
+20210225
+모던리액트 1장 복습하기
